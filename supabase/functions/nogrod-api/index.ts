@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { validateApiKey } from './_lib/auth.ts'
+import { validateApiKey, extractApiKey } from './_lib/auth.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +12,8 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers: CORS_HEADERS })
   }
 
-  const apiKey = req.headers.get('X-Api-Key')
+  const url = new URL(req.url)
+  const apiKey = extractApiKey(req.headers, url.searchParams)
   if (!validateApiKey(apiKey, Deno.env.get('NOGROD_API_KEY'))) {
     return json({ error: 'Unauthorized' }, 401)
   }
@@ -22,7 +23,6 @@ Deno.serve(async (req: Request) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  const url = new URL(req.url)
   const path = url.pathname.replace(/^\/nogrod-api/, '')
 
   // GET /projects
