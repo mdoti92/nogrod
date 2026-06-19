@@ -1,25 +1,12 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabase'
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import Inbox from './pages/Inbox'
 
 export default function App() {
-  const [projects, setProjects] = useState([])
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    supabase
-      .from('projects')
-      .select('*')
-      .then(({ data, error }) => {
-        if (error) setError(error.message)
-        else setProjects(data)
-      })
-  }, [])
-
   return (
-    <div>
-      <h1>Nogrod — TD Forge</h1>
-      {error && <p>Error: {error}</p>}
-      <pre>{JSON.stringify(projects, null, 2)}</pre>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/inbox" element={<Inbox />} />
+    </Routes>
   )
 }
