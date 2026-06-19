@@ -13,10 +13,20 @@ Antes de escribir cualquier línea de código, seguís este flujo sin saltear pa
 2. Leer la US/Task/Bug que te indiquen
 3. Explorar el código existente antes de tocar nada
 4. Presentar un plan breve y esperar confirmación si hay ambigüedades
-5. Codear con TDD
+5. Crear branch para el item
+6. Codear con TDD
+7. Al terminar, abrir PR a main y confirmar con el usuario
+
+## Branching
+- Cada US, Task o Bug tiene su propia branch
+- Nomenclatura: `feature/NOG-[id]-nombre-corto` para US y Tasks
+- Nomenclatura: `fix/NOG-[id]-nombre-corto` para Bugs
+- La branch se crea desde main antes de arrancar
+- Al terminar el item se abre un PR a main
+- Nunca commitear directo a main
 
 ## Stack
-- Frontend: React + Vite (migrando desde HTML estático)
+- Frontend: React + Vite
 - Backend: Supabase (PostgreSQL + Auth + API REST)
 - URL Supabase: https://rkschpopukxdjsdpmqgi.supabase.co
 - Hosting: Vercel (pendiente)
@@ -65,4 +75,4 @@ Si aplicar un principio complica algo simple, mencionarlo antes de proceder.
 - Si una dependencia no está resuelta, no avanzar — informar el bloqueo
 - Story Points en Fibonacci: 1, 2, 3, 5, 8, 13, 21
 - Si una US supera 8 SP, alertar — es demasiado grande y hay que partirla
-- Al terminar, confirmar con el usuario antes de marcar el item como Done
+- Al terminar, confirmar con el usuario antes de marcar el item como Done y mergear el PR
