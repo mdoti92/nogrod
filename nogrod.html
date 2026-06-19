@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nogrod — TD Forge</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --gold: #C9A84C;
+    --gold-dim: #8a6e2f;
+    --gold-glow: rgba(201,168,76,0.15);
+    --red: #8B2020;
+    --red-bright: #c0392b;
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --text-muted: #555;
+    --status-backlog: #444;
+    --status-todo: #2a4a7a;
+    --status-progress: #7a5a00;
+    --status-review: #4a2a7a;
+    --status-done: #1a5a2a;
+    --font-display: 'Cinzel', serif;
+    --font-ui: 'Inter', sans-serif;
+    --radius: 6px;
+    --transition: 0.2s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 24px;
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .logo span {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font-ui);
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  .header-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  /* LAYOUT */
+  .app {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 56px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section { padding: 16px 12px 8px; }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 8px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 13px;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: var(--gold-glow); color: var(--gold); }
+
+  .project-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+
+  .page-subtitle { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #0a0a0f;
+  }
+  .btn-primary:hover { background: #d4b45a; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--gold-dim); color: var(--text); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red-bright);
+    border: 1px solid var(--red);
+  }
+  .btn-danger:hover { background: var(--red); color: var(--text); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-dim));
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .card-title:hover { color: var(--gold); }
+
+  .card-body { padding: 14px 16px; }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  /* BOARD */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .board-col { display: flex; flex-direction: column; gap: 8px; }
+
+  .board-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .board-col-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .board-col-count {
+    font-size: 11px;
+    background: var(--border);
+    color: var(--text-dim);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  .board-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .board-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .board-item:hover { border-color: var(--gold-dim); }
+  .board-item:hover::before { opacity: 1; }
+
+  .board-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .board-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .badge-us { background: #1a3a5a; color: #6ab4f5; }
+  .badge-task { background: #1a3a1a; color: #6af56a; }
+  .badge-bug { background: #3a1a1a; color: #f56a6a; }
+  .badge-subtask { background: #2a2a1a; color: #f5d06a; }
+
+  .badge-sp {
+    background: var(--gold-glow);
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+  }
+
+  .badge-sp.warning { background: rgba(139,32,32,0.2); color: #f5a0a0; border-color: var(--red); }
+
+  .badge-priority-critical { background: #3a0a0a; color: #ff6b6b; }
+  .badge-priority-high { background: #2a1a0a; color: #ffaa6b; }
+  .badge-priority-medium { background: #1a2a0a; color: #aaff6b; }
+  .badge-priority-low { background: #0a1a2a; color: #6baaff; }
+
+  /* STATUS */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .status-backlog { background: #1a1a1a; color: #666; border: 1px solid #333; }
+  .status-todo { background: #0d1a2d; color: #4a9eff; border: 1px solid #1a3a5a; }
+  .status-in_progress { background: #1a1200; color: #ffc107; border: 1px solid #3a2800; }
+  .status-in_review { background: #1a0d2d; color: #c084fc; border: 1px solid #3a1a5a; }
+  .status-done { background: #0d1a0d; color: #4ade80; border: 1px solid #1a3a1a; }
+
+  /* LIST */
+  .item-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .item-row:hover { border-color: var(--gold-dim); background: var(--surface2); }
+
+  .item-row-title { flex: 1; font-size: 13px; font-weight: 500; }
+  .item-row-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+  }
+
+  /* FORMS */
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  input[type="text"], textarea, select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    padding: 8px 12px;
+    transition: var(--transition);
+    width: 100%;
+    outline: none;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 2px var(--gold-glow);
+  }
+
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  select option { background: var(--surface2); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* SP WARNING */
+  .sp-warning {
+    background: rgba(139,32,32,0.15);
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: #f5a0a0;
+    font-size: 12px;
+    display: none;
+  }
+
+  /* EPIC SECTION */
+  .epic-section {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .epic-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .epic-header:hover { background: rgba(201,168,76,0.05); }
+
+  .epic-chevron {
+    color: var(--text-muted);
+    transition: transform var(--transition);
+    font-size: 12px;
+  }
+
+  .epic-chevron.open { transform: rotate(90deg); }
+
+  .epic-title-text {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .epic-body {
+    padding: 0 16px 12px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .epic-body.open { display: flex; }
+
+  /* EMPTY */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-title { font-size: 15px; color: var(--text-dim); margin-bottom: 6px; }
+  .empty-desc { font-size: 13px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: var(--transition);
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* CLOSE BTN */
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    line-height: 1;
+    transition: var(--transition);
+  }
+  .close-btn:hover { color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Nogrod <span>TD Forge</span></div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="showNewItemModal()">+ Nuevo Item</button>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Vistas</div>
+      <div class="sidebar-item active" onclick="setView('board', this)">⬛ Board</div>
+      <div class="sidebar-item" onclick="setView('backlog', this)">☰ Backlog</div>
+      <div class="sidebar-item" onclick="setView('overview', this)">◈ Overview</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Proyectos</div>
+      <div id="project-list"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+    <div class="empty-state">
+      <div class="empty-icon">⚒</div>
+      <div class="empty-title">Cargando Nogrod...</div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NUEVO ITEM -->
+<div class="modal-overlay hidden" id="item-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Nuevo Item</div>
+      <button class="close-btn" onclick="closeModal('item-modal')">×</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="item-type" onchange="onTypeChange()">
+          <option value="us">Historia de Usuario</option>
+          <option value="task">Task</option>
+          <option value="bug">Bug</option>
+          <option value="subtask">Subtask</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" id="item-title" placeholder="Título del item">
+      </div>
+      <div class="form-group">
+        <label>Proyecto</label>
+        <select id="item-project" onchange="loadEpicsForProject()"></select>
+      </div>
+      <div class="form-group">
+        <label>Épica</label>
+        <select id="item-epic">
+          <option value="">Sin épica</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Contexto / Descripción</label>
+        <textarea id="item-context" placeholder="¿Por qué existe este item? ¿Qué problema resuelve?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Story Points</label>
+          <select id="item-sp" onchange="checkSPWarning()">
+            <option value="">Sin estimar</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="8">8</option>
+            <option value="13">13</option>
+            <option value="21">21</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prioridad</label>
+          <select id="item-priority">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+            <option value="critical">Crítica</option>
+          </select>
+        </div>
+      </div>
+      <div class="sp-warning" id="sp-warning">
+        ⚠️ Esta US supera los 8 SP — considerar dividirla en historias más pequeñas.
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="item-status">
+          <option value="backlog">Backlog</option>
+          <option value="todo">To Do</option>
+          <option value="in_progress">In Progress</option>
+          <option value="in_review">In Review</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div id="bug-fields" class="hidden">
+        <div class="form-group">
+          <label>Comportamiento Actual</label>
+          <textarea id="item-actual" placeholder="¿Qué pasa hoy?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Comportamiento Esperado</label>
+          <textarea id="item-expected" placeholder="¿Qué debería pasar?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Severidad</label>
+          <select id="item-severity">
+            <option value="low">Baja</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+            <option value="critical">Crítica</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Scope Out (qué NO hace)</label>
+        <textarea id="item-scope" placeholder="Qué está explícitamente fuera del alcance" style="min-height:60px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('item-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveItem()">Crear Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE ITEM -->
+<div class="modal-overlay hidden" id="detail-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div id="detail-type-badge"></div>
+      <button class="close-btn" onclick="closeModal('detail-modal')">×</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="detail-delete-btn">Eliminar</button>
+      <button class="btn btn-ghost" onclick="closeModal('detail-modal')">Cerrar</button>
+      <button class="btn btn-primary" id="detail-save-btn">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://rkschpopukxdjsdpmqgi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6RXLmz3XXim_yLJDpfkdsg_z3FPU351';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let state = {
+  projects: [],
+  currentProject: null,
+  items: [],
+  epics: [],
+  view: 'board',
+  editingItem: null
+};
+
+const STATUS_LABELS = {
+  backlog: 'Backlog', todo: 'To Do',
+  in_progress: 'In Progress', in_review: 'In Review', done: 'Done'
+};
+
+const TYPE_LABELS = {
+  us: 'US', task: 'Task', bug: 'Bug', subtask: 'Subtask'
+};
+
+const PRIORITY_LABELS = {
+  low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica'
+};
+
+// ─── INIT ───────────────────────────────────────────
+async function init() {
+  await loadProjects();
+  if (state.projects.length > 0) {
+    selectProject(state.projects[0]);
+  }
+}
+
+async function loadProjects() {
+  const { data, error } = await db.from('projects').select('*').order('created_at');
+  if (error) { showToast('Error cargando proyectos'); return; }
+  state.projects = data || [];
+  renderSidebar();
+  renderProjectSelect();
+}
+
+function renderSidebar() {
+  const el = document.getElementById('project-list');
+  el.innerHTML = state.projects.map(p => `
+    <div class="sidebar-item ${state.currentProject?.id === p.id ? 'active' : ''}"
+         onclick="selectProject(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+      <div class="project-dot" style="background:${p.color}"></div>
+      ${p.name}
+    </div>
+  `).join('');
+}
+
+function renderProjectSelect() {
+  const sel = document.getElementById('item-project');
+  if (!sel) return;
+  sel.innerHTML = state.projects.map(p =>
+    `<option value="${p.id}">${p.name}</option>`
+  ).join('');
+  if (state.currentProject) sel.value = state.currentProject.id;
+}
+
+async function selectProject(project) {
+  state.currentProject = project;
+  renderSidebar();
+  await loadData();
+  renderView();
+}
+
+async function loadData() {
+  if (!state.currentProject) return;
+  const pid = state.currentProject.id;
+
+  const [itemsRes, epicsRes] = await Promise.all([
+    db.from('items').select('*').eq('project_id', pid).order('created_at'),
+    db.from('epics').select('*').eq('project_id', pid).order('created_at')
+  ]);
+
+  state.items = itemsRes.data || [];
+  state.epics = epicsRes.data || [];
+}
+
+// ─── VIEWS ──────────────────────────────────────────
+function setView(view, el) {
+  state.view = view;
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderView();
+}
+
+function renderView() {
+  const main = document.getElementById('main-content');
+  if (!state.currentProject) {
+    main.innerHTML = '<div class="empty-state"><div class="empty-icon">⚒</div><div class="empty-title">Seleccioná un proyecto</div></div>';
+    return;
+  }
+  if (state.view === 'board') renderBoard();
+  else if (state.view === 'backlog') renderBacklog();
+  else renderOverview();
+}
+
+function renderBoard() {
+  const main = document.getElementById('main-content');
+  const statuses = ['backlog', 'todo', 'in_progress', 'in_review', 'done'];
+  const rootItems = state.items.filter(i => !i.parent_id);
+
+  main.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">${state.currentProject.name}</div>
+        <div class="page-subtitle">Board de trabajo</div>
+      </div>
+      <button class="btn btn-primary" onclick="showNewItemModal()">+ Nuevo Item</button>
+    </div>
+    <div class="board">
+      ${statuses.map(status => {
+        const items = rootItems.filter(i => i.status === status);
+        return `
+          <div class="board-col">
+            <div class="board-col-header">
+              <span class="board-col-title">${STATUS_LABELS[status]}</span>
+              <span class="board-col-count">${items.length}</span>
+            </div>
+            ${items.length === 0
+              ? `<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px">Vacío</div>`
+              : items.map(item => `
+              <div class="board-item" onclick="showDetail('${item.id}')">
+                <div class="board-item-title">${item.title}</div>
+                <div class="board-item-meta">
+                  <span class="badge badge-${item.type}">${TYPE_LABELS[item.type]}</span>
+                  ${item.story_points ? `<span class="badge badge-sp ${item.story_points > 8 ? 'warning' : ''}">${item.story_points} SP</span>` : ''}
+                  <span class="badge badge-priority-${item.priority}">${PRIORITY_LABELS[item.priority]}</span>
+                </div>
+              </div>`).join('')}
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderBacklog() {
+  const main = document.getElementById('main-content');
+  const byEpic = {};
+  const noEpic = [];
+
+  state.items.filter(i => !i.parent_id).forEach(item => {
+    if (item.epic_id) {
+      if (!byEpic[item.epic_id]) byEpic[item.epic_id] = [];
+      byEpic[item.epic_id].push(item);
+    } else noEpic.push(item);
+  });
+
+  const epicsHtml = state.epics.map(epic => {
+    const items = byEpic[epic.id] || [];
+    return `
+      <div class="epic-section">
+        <div class="epic-header" onclick="toggleEpic('epic-${epic.id}')">
+          <span class="epic-chevron" id="chev-epic-${epic.id}">▶</span>
+          <span class="epic-title-text">${epic.title}</span>
+          <span class="badge badge-sp" style="margin-left:auto">${items.length} items</span>
+          <span class="status-pill status-${epic.status}">${STATUS_LABELS[epic.status]}</span>
+        </div>
+        <div class="epic-body" id="epic-${epic.id}">
+          ${items.length === 0
+            ? `<div style="color:var(--text-muted);font-size:12px;padding:8px 0">Sin items</div>`
+            : items.map(item => itemRowHtml(item)).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  const noEpicHtml = noEpic.length > 0 ? `
+    <div class="epic-section">
+      <div class="epic-header" onclick="toggleEpic('epic-noepic')">
+        <span class="epic-chevron" id="chev-epic-noepic">▶</span>
+        <span class="epic-title-text" style="color:var(--text-muted)">Sin épica</span>
+        <span class="badge badge-sp" style="margin-left:auto">${noEpic.length} items</span>
+      </div>
+      <div class="epic-body" id="epic-noepic">
+        ${noEpic.map(item => itemRowHtml(item)).join('')}
+      </div>
+    </div>` : '';
+
+  main.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">${state.currentProject.name}</div>
+        <div class="page-subtitle">Backlog completo</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="showNewEpicModal()">+ Épica</button>
+        <button class="btn btn-primary" onclick="showNewItemModal()">+ Nuevo Item</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${epicsHtml}${noEpicHtml}
+      ${state.epics.length === 0 && state.items.length === 0
+        ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Backlog vacío</div><div class="empty-desc">Creá tu primera épica o item para empezar</div></div>`
+        : ''}
+    </div>`;
+}
+
+function itemRowHtml(item) {
+  return `
+    <div class="item-row" onclick="showDetail('${item.id}')">
+      <span class="badge badge-${item.type}">${TYPE_LABELS[item.type]}</span>
+      <span class="item-row-title">${item.title}</span>
+      <div class="item-row-meta">
+        ${item.story_points ? `<span class="badge badge-sp ${item.story_points > 8 ? 'warning' : ''}">${item.story_points} SP</span>` : ''}
+        <span class="status-pill status-${item.status}">${STATUS_LABELS[item.status]}</span>
+        <span class="badge badge-priority-${item.priority}">${PRIORITY_LABELS[item.priority]}</span>
+      </div>
+    </div>`;
+}
+
+function renderOverview() {
+  const main = document.getElementById('main-content');
+  const total = state.items.length;
+  const done = state.items.filter(i => i.status === 'done').length;
+  const inProgress = state.items.filter(i => i.status === 'in_progress').length;
+  const bugs = state.items.filter(i => i.type === 'bug').length;
+  const totalSP = state.items.reduce((a,i) => a + (i.story_points || 0), 0);
+
+  main.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">${state.currentProject.name}</div>
+        <div class="page-subtitle">Vista general</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total items</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#4ade80">${done}</div><div class="stat-label">Completados</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#ffc107">${inProgress}</div><div class="stat-label">En progreso</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#f56a6a">${bugs}</div><div class="stat-label">Bugs abiertos</div></div>
+      <div class="stat-card"><div class="stat-value">${totalSP}</div><div class="stat-label">Story Points</div></div>
+      <div class="stat-card"><div class="stat-value">${state.epics.length}</div><div class="stat-label">Épicas</div></div>
+    </div>`;
+}
+
+function toggleEpic(id) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
+  if (body) body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open');
+}
+
+// ─── MODALS ─────────────────────────────────────────
+function showNewItemModal() {
+  state.editingItem = null;
+  document.getElementById('modal-title').textContent = 'Nuevo Item';
+  document.getElementById('item-title').value = '';
+  document.getElementById('item-context').value = '';
+  document.getElementById('item-scope').value = '';
+  document.getElementById('item-sp').value = '';
+  document.getElementById('item-priority').value = 'medium';
+  document.getElementById('item-status').value = 'backlog';
+  document.getElementById('item-type').value = 'us';
+  document.getElementById('sp-warning').style.display = 'none';
+  document.getElementById('bug-fields').classList.add('hidden');
+  renderProjectSelect();
+  loadEpicsForProject();
+  document.getElementById('item-modal').classList.remove('hidden');
+}
+
+function showNewEpicModal() {
+  const title = prompt('Nombre de la épica:');
+  if (!title || !title.trim()) return;
+  createEpic(title.trim());
+}
+
+async function createEpic(title) {
+  const { error } = await db.from('epics').insert({
+    project_id: state.currentProject.id,
+    title,
+    status: 'backlog'
+  });
+  if (error) { showToast('Error creando épica'); return; }
+  showToast('Épica creada');
+  await loadData();
+  renderView();
+}
+
+async function loadEpicsForProject() {
+  const sel = document.getElementById('item-project');
+  const pid = sel ? sel.value : state.currentProject?.id;
+  const epicSel = document.getElementById('item-epic');
+  if (!epicSel) return;
+
+  const { data } = await db.from('epics').select('*').eq('project_id', pid);
+  epicSel.innerHTML = '<option value="">Sin épica</option>' +
+    (data || []).map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+}
+
+function onTypeChange() {
+  const type = document.getElementById('item-type').value;
+  const bugFields = document.getElementById('bug-fields');
+  if (type === 'bug') bugFields.classList.remove('hidden');
+  else bugFields.classList.add('hidden');
+}
+
+function checkSPWarning() {
+  const sp = parseInt(document.getElementById('item-sp').value);
+  const warn = document.getElementById('sp-warning');
+  warn.style.display = sp > 8 ? 'block' : 'none';
+}
+
+async function saveItem() {
+  const title = document.getElementById('item-title').value.trim();
+  if (!title) { showToast('El título es requerido'); return; }
+
+  const projectId = document.getElementById('item-project').value;
+  const epicId = document.getElementById('item-epic').value || null;
+  const type = document.getElementById('item-type').value;
+  const sp = document.getElementById('item-sp').value;
+
+  const payload = {
+    project_id: projectId,
+    epic_id: epicId,
+    type,
+    title,
+    context: document.getElementById('item-context').value || null,
+    scope_out: document.getElementById('item-scope').value || null,
+    story_points: sp ? parseInt(sp) : null,
+    priority: document.getElementById('item-priority').value,
+    status: document.getElementById('item-status').value,
+  };
+
+  if (type === 'bug') {
+    payload.actual_behavior = document.getElementById('item-actual').value || null;
+    payload.expected_behavior = document.getElementById('item-expected').value || null;
+    payload.severity = document.getElementById('item-severity').value;
+  }
+
+  const { error } = await db.from('items').insert(payload);
+  if (error) { showToast('Error creando item: ' + error.message); return; }
+
+  showToast('Item creado ⚒');
+  closeModal('item-modal');
+  await loadData();
+  renderView();
+}
+
+async function showDetail(itemId) {
+  const item = state.items.find(i => i.id === itemId);
+  if (!item) return;
+
+  state.editingItem = item;
+  const epic = item.epic_id ? state.epics.find(e => e.id === item.epic_id) : null;
+
+  document.getElementById('detail-type-badge').innerHTML =
+    `<span class="badge badge-${item.type}">${TYPE_LABELS[item.type]}</span>`;
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="det-title" value="${escHtml(item.title)}">
+    </div>
+    ${epic ? `<div style="color:var(--text-dim);font-size:12px">📦 Épica: ${escHtml(epic.title)}</div>` : ''}
+    <div class="form-group">
+      <label>Contexto</label>
+      <textarea id="det-context">${escHtml(item.context || '')}</textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="det-status">
+          ${Object.entries(STATUS_LABELS).map(([v,l]) =>
+            `<option value="${v}" ${item.status === v ? 'selected' : ''}>${l}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Story Points</label>
+        <select id="det-sp">
+          <option value="">Sin estimar</option>
+          ${[1,2,3,5,8,13,21].map(n =>
+            `<option value="${n}" ${item.story_points === n ? 'selected' : ''}>${n}</option>`
+          ).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="det-priority">
+          ${Object.entries(PRIORITY_LABELS).map(([v,l]) =>
+            `<option value="${v}" ${item.priority === v ? 'selected' : ''}>${l}</option>`
+          ).join('')}
+        </select>
+      </div>
+    </div>
+    ${item.type === 'bug' ? `
+      <div class="form-group">
+        <label>Comportamiento Actual</label>
+        <textarea id="det-actual">${escHtml(item.actual_behavior || '')}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Comportamiento Esperado</label>
+        <textarea id="det-expected">${escHtml(item.expected_behavior || '')}</textarea>
+      </div>
+    ` : ''}
+    <div class="form-group">
+      <label>Scope Out</label>
+      <textarea id="det-scope">${escHtml(item.scope_out || '')}</textarea>
+    </div>
+    <div style="color:var(--text-muted);font-size:11px">
+      Creado: ${new Date(item.created_at).toLocaleString('es-UY')}
+    </div>
+  `;
+
+  document.getElementById('detail-save-btn').onclick = () => updateItem(item.id);
+  document.getElementById('detail-delete-btn').onclick = () => deleteItem(item.id);
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+async function updateItem(itemId) {
+  const sp = document.getElementById('det-sp').value;
+  const payload = {
+    title: document.getElementById('det-title').value.trim(),
+    context: document.getElementById('det-context').value || null,
+    status: document.getElementById('det-status').value,
+    story_points: sp ? parseInt(sp) : null,
+    priority: document.getElementById('det-priority').value,
+    scope_out: document.getElementById('det-scope')?.value || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const actEl = document.getElementById('det-actual');
+  const expEl = document.getElementById('det-expected');
+  if (actEl) payload.actual_behavior = actEl.value || null;
+  if (expEl) payload.expected_behavior = expEl.value || null;
+
+  const { error } = await db.from('items').update(payload).eq('id', itemId);
+  if (error) { showToast('Error guardando'); return; }
+
+  showToast('Guardado ✓');
+  closeModal('detail-modal');
+  await loadData();
+  renderView();
+}
+
+async function deleteItem(itemId) {
+  if (!confirm('¿Eliminar este item?')) return;
+  const { error } = await db.from('items').delete().eq('id', itemId);
+  if (error) { showToast('Error eliminando'); return; }
+  showToast('Item eliminado');
+  closeModal('detail-modal');
+  await loadData();
+  renderView();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// ─── UTILS ──────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// Click fuera del modal lo cierra
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+});
+
+init();
+</script>
+</body>
+</html>
