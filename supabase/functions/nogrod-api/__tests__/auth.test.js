@@ -17,4 +17,12 @@ describe('validateApiKey', () => {
   it('returns true when key matches', () => {
     expect(validateApiKey('secret', 'secret')).toBe(true)
   })
+
+  it('returns true when secret has trailing newline (Deno.env.get quirk)', () => {
+    expect(validateApiKey('secret', 'secret\n')).toBe(true)
+  })
+
+  it('returns true when either value has surrounding whitespace', () => {
+    expect(validateApiKey(' secret ', ' secret ')).toBe(true)
+  })
 })
