@@ -58,7 +58,7 @@ export default function Inbox() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear item')
-      navigate('/', { state: { success: true, id: data.id, title: item.title } })
+      navigate('/', { state: { success: true, item_id: data.item_id, title: item.title } })
     } catch (err) {
       setError(err.message)
     } finally {
