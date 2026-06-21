@@ -45,5 +45,26 @@ describe('parseInboxParams', () => {
     expect(result.story_points).toBeUndefined()
     expect(result.priority).toBeUndefined()
     expect(result.context).toBeUndefined()
+    expect(result.acceptance_criteria).toBeUndefined()
+  })
+
+  it('maps multiple ca params to acceptance_criteria array', () => {
+    const params = new URLSearchParams(
+      'type=us&title=T&project_id=x&ca=El+sistema+valida+email&ca=Se+muestra+error+si+falla'
+    )
+    expect(parseInboxParams(params).acceptance_criteria).toEqual([
+      'El sistema valida email',
+      'Se muestra error si falla',
+    ])
+  })
+
+  it('maps single ca param to acceptance_criteria array of one', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=Un+solo+criterio')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['Un solo criterio'])
+  })
+
+  it('omits acceptance_criteria when no ca params present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).acceptance_criteria).toBeUndefined()
   })
 })

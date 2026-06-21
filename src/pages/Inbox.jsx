@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { parseInboxParams } from '../lib/inbox'
+import { bulkInsertCriteria } from '../lib/acceptanceCriteria'
 
 const API_URL = import.meta.env.VITE_NOGROD_API_URL
 const API_KEY = import.meta.env.VITE_NOGROD_API_KEY
@@ -51,13 +52,17 @@ export default function Inbox() {
     setLoading(true)
     setError(null)
     try {
+      const { acceptance_criteria: caList, ...itemPayload } = item
       const res = await fetch(`${API_URL}/items?api_key=${API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
+        body: JSON.stringify(itemPayload),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear item')
+      if (caList && caList.length > 0) {
+        await bulkInsertCriteria(data.id, caList)
+      }
       navigate('/', { state: { success: true, item_id: data.item_id, title: item.title } })
     } catch (err) {
       setError(err.message)
