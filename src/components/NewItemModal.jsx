@@ -12,6 +12,7 @@ const EMPTY_FORM = {
   epicId: '',
   context: '',
   scopeOut: '',
+  executablePrompt: '',
   storyPoints: '',
   priority: 'medium',
   status: 'backlog',
@@ -60,6 +61,7 @@ export default function NewItemModal() {
       title: form.title.trim(),
       context: form.context || null,
       scope_out: form.scopeOut || null,
+      executable_prompt: form.executablePrompt || null,
       story_points: form.storyPoints ? parseInt(form.storyPoints) : null,
       priority: form.priority,
       status: form.status,
@@ -204,6 +206,18 @@ export default function NewItemModal() {
               onChange={e => set('scopeOut', e.target.value)}
               placeholder="Qué está explícitamente fuera del alcance"
               style={{ minHeight: 60 }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+              Prompt ejecutable
+            </label>
+            <textarea
+              value={form.executablePrompt}
+              onChange={e => set('executablePrompt', e.target.value)}
+              placeholder="Prompt para Claude Code..."
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
             />
           </div>
         </div>
