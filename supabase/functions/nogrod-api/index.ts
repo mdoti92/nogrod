@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateApiKey, extractApiKey } from './_lib/auth.ts'
+import { formatItemId } from './_lib/items.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -45,9 +46,16 @@ Deno.serve(async (req: Request) => {
   // POST /items
   if (req.method === 'POST' && path === '/items') {
     const body = await req.json()
+
+    const { data: counter, error: counterError } = await supabase
+      .rpc('claim_next_item_id', { p_project_id: body.project_id })
+      .single()
+    if (counterError) return json({ error: counterError.message }, 400)
+
+    const itemId = formatItemId(counter.item_prefix, counter.seq_id)
     const { data, error } = await supabase
       .from('items')
-      .insert(body)
+      .insert({ ...body, sequential_id: counter.seq_id, item_id: itemId })
       .select()
       .single()
     if (error) return json({ error: error.message }, 400)
