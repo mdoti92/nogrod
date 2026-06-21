@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
+import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
 
 export default function DetailModal() {
   const { detailItem, setDetailItem, epics, showToast, refresh } = useApp()
@@ -144,6 +145,8 @@ export default function DetailModal() {
             <label>Scope Out</label>
             <textarea value={form.scopeOut} onChange={e => set('scopeOut', e.target.value)} />
           </div>
+
+          <AcceptanceCriteriaSection itemId={detailItem.id} />
 
           <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
