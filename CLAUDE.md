@@ -18,12 +18,13 @@ Antes de escribir cualquier línea de código, seguís este flujo sin saltear pa
 7. Al terminar, abrir PR a main y confirmar con el usuario
 
 ## Branching
-- Cada US, Task o Bug tiene su propia branch
-- Nomenclatura: `feature/NOG-[id]-nombre-corto` para US y Tasks
-- Nomenclatura: `fix/NOG-[id]-nombre-corto` para Bugs
-- La branch se crea desde main antes de arrancar
-- Al terminar el item se abre un PR a main
-- Nunca commitear directo a main
+- Cada US, Task o Bug sale desde `develop`, nunca desde `main`
+- Nomenclatura: `feature/nombre-corto` para US y Tasks
+- Nomenclatura: `fix/nombre-corto` para Bugs
+- Antes de crear una branch nueva: `git checkout develop && git pull`
+- Al terminar el item se abre un PR a `develop`
+- Nunca commitear directo a `main` ni a `develop`
+- El merge de `develop` a `main` lo decide el usuario manualmente
 
 ## Stack
 - Frontend: React + Vite
