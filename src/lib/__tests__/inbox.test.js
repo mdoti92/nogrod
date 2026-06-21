@@ -45,5 +45,16 @@ describe('parseInboxParams', () => {
     expect(result.story_points).toBeUndefined()
     expect(result.priority).toBeUndefined()
     expect(result.context).toBeUndefined()
+    expect(result.executable_prompt).toBeUndefined()
+  })
+
+  it('maps prompt param to executable_prompt when present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&prompt=Implementar+el+endpoint')
+    expect(parseInboxParams(params).executable_prompt).toBe('Implementar el endpoint')
+  })
+
+  it('omits executable_prompt when prompt param is absent', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).executable_prompt).toBeUndefined()
   })
 })

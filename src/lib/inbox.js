@@ -21,5 +21,8 @@ export function parseInboxParams(searchParams) {
   const context = searchParams.get('context')
   if (context) item.context = context
 
+  const prompt = searchParams.get('prompt')
+  if (prompt) item.executable_prompt = prompt
+
   return item
 }
