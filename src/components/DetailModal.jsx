@@ -147,12 +147,12 @@ export default function DetailModal() {
             <textarea value={form.scopeOut} onChange={e => set('scopeOut', e.target.value)} />
           </div>
 
-          {detailItem.executable_prompt && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
-                  Prompt ejecutable
-                </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+                Prompt ejecutable
+              </label>
+              {form.executablePrompt && (
                 <button
                   className="btn btn-ghost"
                   style={{ fontSize: 11, padding: '3px 10px' }}
@@ -160,14 +160,15 @@ export default function DetailModal() {
                 >
                   Copiar
                 </button>
-              </div>
-              <textarea
-                value={form.executablePrompt}
-                onChange={e => set('executablePrompt', e.target.value)}
-                style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
-              />
+              )}
             </div>
-          )}
+            <textarea
+              value={form.executablePrompt}
+              onChange={e => set('executablePrompt', e.target.value)}
+              placeholder="Prompt para Claude Code..."
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
+            />
+          </div>
 
           <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
