@@ -1,27 +1,49 @@
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { AppProvider, useApp } from '../context/AppContext'
+import Header from '../components/Header'
+import Sidebar from '../components/Sidebar'
+import BoardView from '../components/BoardView'
+import BacklogView from '../components/BacklogView'
+import OverviewView from '../components/OverviewView'
+import NewItemModal from '../components/NewItemModal'
+import DetailModal from '../components/DetailModal'
+import Toast from '../components/Toast'
 
-export default function Home() {
-  const { state } = useLocation()
+function NogrodApp() {
+  const { view, newItemOpen, detailItem, showToast } = useApp()
+  const location = useLocation()
+
+  useEffect(() => {
+    const { state } = location
+    if (state?.success && state?.item_id) {
+      showToast(`Item creado: ${state.item_id} — ${state.title}`)
+      window.history.replaceState({}, '')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div style={styles.page}>
-      {state?.success && (
-        <div style={styles.banner}>
-          ✓ Item creado correctamente —{' '}
-          <strong>{state.title}</strong>{' '}
-          <span style={styles.id}>#{state.id}</span>
-        </div>
-      )}
-      <h1 style={styles.title}>Nogrod — TD Forge</h1>
-      <p style={styles.muted}>Board en construcción.</p>
-    </div>
+    <>
+      <Header />
+      <div className="app">
+        <Sidebar />
+        <main className="main">
+          {view === 'board' && <BoardView />}
+          {view === 'backlog' && <BacklogView />}
+          {view === 'overview' && <OverviewView />}
+        </main>
+      </div>
+      {newItemOpen && <NewItemModal />}
+      {detailItem && <DetailModal />}
+      <Toast />
+    </>
   )
 }
 
-const styles = {
-  page: { minHeight: '100vh', background: '#0a0a0f', color: '#e8e8e8', padding: 32, fontFamily: 'Inter, sans-serif' },
-  banner: { background: '#1a3a1a', border: '1px solid #2a5a2a', color: '#6fcf6f', borderRadius: 6, padding: '12px 16px', marginBottom: 24, fontSize: 14 },
-  title: { color: '#C9A84C', fontFamily: 'serif', fontSize: 28, marginBottom: 8 },
-  muted: { color: '#555', fontSize: 14 },
-  id: { color: '#888', fontFamily: 'monospace', fontSize: 12 },
+export default function Home() {
+  return (
+    <AppProvider>
+      <NogrodApp />
+    </AppProvider>
+  )
 }
