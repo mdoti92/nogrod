@@ -24,5 +24,8 @@ export function parseInboxParams(searchParams) {
   const caList = searchParams.getAll('ca')
   if (caList.length > 0) item.acceptance_criteria = caList
 
+  const prompt = searchParams.get('prompt')
+  if (prompt) item.executable_prompt = prompt
+
   return item
 }

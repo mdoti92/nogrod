@@ -46,6 +46,7 @@ describe('parseInboxParams', () => {
     expect(result.priority).toBeUndefined()
     expect(result.context).toBeUndefined()
     expect(result.acceptance_criteria).toBeUndefined()
+    expect(result.executable_prompt).toBeUndefined()
   })
 
   it('maps multiple ca params to acceptance_criteria array', () => {
@@ -66,5 +67,15 @@ describe('parseInboxParams', () => {
   it('omits acceptance_criteria when no ca params present', () => {
     const params = new URLSearchParams('type=us&title=T&project_id=x')
     expect(parseInboxParams(params).acceptance_criteria).toBeUndefined()
+  })
+
+  it('maps prompt param to executable_prompt when present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&prompt=Implementar+el+endpoint')
+    expect(parseInboxParams(params).executable_prompt).toBe('Implementar el endpoint')
+  })
+
+  it('omits executable_prompt when prompt param is absent', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).executable_prompt).toBeUndefined()
   })
 })

@@ -19,6 +19,7 @@ export default function DetailModal() {
       scopeOut: detailItem.scope_out || '',
       actualBehavior: detailItem.actual_behavior || '',
       expectedBehavior: detailItem.expected_behavior || '',
+      executablePrompt: detailItem.executable_prompt || '',
     })
   }, [detailItem])
 
@@ -39,6 +40,7 @@ export default function DetailModal() {
       story_points: form.storyPoints ? parseInt(form.storyPoints) : null,
       priority: form.priority,
       scope_out: form.scopeOut || null,
+      executable_prompt: form.executablePrompt || null,
       updated_at: new Date().toISOString(),
     }
     if (detailItem.type === 'bug') {
@@ -147,6 +149,29 @@ export default function DetailModal() {
           </div>
 
           <AcceptanceCriteriaSection itemId={detailItem.id} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+                Prompt ejecutable
+              </label>
+              {form.executablePrompt && (
+                <button
+                  className="btn btn-ghost"
+                  style={{ fontSize: 11, padding: '3px 10px' }}
+                  onClick={() => navigator.clipboard.writeText(form.executablePrompt).then(() => showToast('Prompt copiado ✓'))}
+                >
+                  Copiar
+                </button>
+              )}
+            </div>
+            <textarea
+              value={form.executablePrompt}
+              onChange={e => set('executablePrompt', e.target.value)}
+              placeholder="Prompt para Claude Code..."
+              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
+            />
+          </div>
 
           <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
