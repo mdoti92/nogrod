@@ -24,7 +24,7 @@ Antes de escribir cualquier línea de código, seguís este flujo sin saltear pa
 - Antes de crear una branch nueva: `git checkout develop && git pull`
 - Al terminar el item se abre un PR a `develop`
 - Nunca commitear directo a `main` ni a `develop`
-- El merge de `develop` a `main` lo decide el usuario manualmente
+- Hacer el merge a `develop` una vez terminado el desarrollo
 
 ## Stack
 - Frontend: React + Vite

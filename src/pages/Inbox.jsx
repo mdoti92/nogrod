@@ -177,7 +177,7 @@ function EditForm({ item, onChange }) {
 const styles = {
   page: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', padding: 24 },
   card: { background: '#12121a', border: '1px solid #2a2a3a', borderRadius: 8, padding: 32, width: '100%', maxWidth: 560 },
-  title: { color: '#C9A84C', fontFamily: 'serif', marginBottom: 24, fontSize: 22 },
+  title: { color: '#A8C0CC', fontFamily: 'serif', marginBottom: 24, fontSize: 22 },
   muted: { color: '#888', fontSize: 14 },
   table: { width: '100%', borderCollapse: 'collapse', marginBottom: 24 },
   tdLabel: { color: '#888', fontSize: 13, padding: '8px 0', width: 120, verticalAlign: 'top' },
@@ -186,7 +186,7 @@ const styles = {
   label: { display: 'flex', flexDirection: 'column', gap: 4, color: '#888', fontSize: 13 },
   input: { background: '#1a1a26', border: '1px solid #2a2a3a', borderRadius: 4, color: '#e8e8e8', fontSize: 14, padding: '6px 10px' },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end' },
-  btnPrimary: { background: '#C9A84C', color: '#0a0a0f', border: 'none', borderRadius: 4, padding: '8px 20px', fontWeight: 600, cursor: 'pointer' },
-  btnSecondary: { background: 'transparent', color: '#C9A84C', border: '1px solid #C9A84C', borderRadius: 4, padding: '8px 20px', cursor: 'pointer' },
+  btnPrimary: { background: '#A8C0CC', color: '#0a0a0f', border: 'none', borderRadius: 4, padding: '8px 20px', fontWeight: 600, cursor: 'pointer' },
+  btnSecondary: { background: 'transparent', color: '#A8C0CC', border: '1px solid #A8C0CC', borderRadius: 4, padding: '8px 20px', cursor: 'pointer' },
   error: { color: '#c0392b', fontSize: 13, marginBottom: 16 },
 }
