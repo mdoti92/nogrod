@@ -8,18 +8,21 @@ export function AppProvider({ children }) {
   const [currentProject, setCurrentProject] = useState(null)
   const [items, setItems] = useState([])
   const [epics, setEpics] = useState([])
+  const [initiatives, setInitiatives] = useState([])
   const [view, setView] = useState('board')
   const [toast, setToast] = useState(null)
   const [newItemOpen, setNewItemOpen] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
 
   async function loadForProject(project) {
-    const [itemsRes, epicsRes] = await Promise.all([
+    const [itemsRes, epicsRes, initiativesRes] = await Promise.all([
       supabase.from('items').select('*').eq('project_id', project.id).order('created_at'),
       supabase.from('epics').select('*').eq('project_id', project.id).order('created_at'),
+      supabase.from('initiatives').select('*').eq('project_id', project.id).order('created_at'),
     ])
     setItems(itemsRes.data || [])
     setEpics(epicsRes.data || [])
+    setInitiatives(initiativesRes.data || [])
   }
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      projects, currentProject, items, epics, view, toast,
+      projects, currentProject, items, epics, initiatives, view, toast,
       newItemOpen, detailItem,
       setView, setNewItemOpen, setDetailItem,
       selectProject, showToast, refresh,

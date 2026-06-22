@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { groupItemsByEpic, STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS } from '../lib/items'
+import { groupItemsByEpic, groupEpicsByInitiative, STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS } from '../lib/items'
 import NewEpicModal from './NewEpicModal'
+import NewInitiativeModal from './NewInitiativeModal'
 
 function ItemRow({ item }) {
   const { setDetailItem } = useApp()
@@ -49,15 +50,41 @@ function EpicSection({ epic, items }) {
   )
 }
 
+function InitiativeSection({ initiative, epics, byEpic }) {
+  const [open, setOpen] = useState(false)
+  const totalItems = epics.reduce((sum, e) => sum + (byEpic[e.id]?.length ?? 0), 0)
+  return (
+    <div className="epic-section" style={{ borderLeft: '3px solid var(--gold)', marginBottom: 4 }}>
+      <div className="epic-header" onClick={() => setOpen(o => !o)}>
+        <span className={`epic-chevron${open ? ' open' : ''}`}>▶</span>
+        <span className="epic-title-text" style={{ fontWeight: 700 }}>{initiative.title}</span>
+        <span className="badge badge-sp" style={{ marginLeft: 'auto' }}>{epics.length} épicas · {totalItems} items</span>
+      </div>
+      {open && (
+        <div className="epic-body">
+          {epics.length === 0
+            ? <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: '8px 0' }}>Sin épicas</div>
+            : epics.map(epic => (
+                <EpicSection key={epic.id} epic={epic} items={byEpic[epic.id] || []} />
+              ))
+          }
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function BacklogView() {
-  const { currentProject, items, epics, setNewItemOpen } = useApp()
+  const { currentProject, items, epics, initiatives, setNewItemOpen } = useApp()
   const [noEpicOpen, setNoEpicOpen] = useState(false)
   const [epicModalOpen, setEpicModalOpen] = useState(false)
+  const [initiativeModalOpen, setInitiativeModalOpen] = useState(false)
 
   if (!currentProject) return null
 
   const { byEpic, noEpic } = groupItemsByEpic(items)
-  const isEmpty = epics.length === 0 && items.filter(i => !i.parent_id).length === 0
+  const { byInitiative, noInitiative } = groupEpicsByInitiative(epics)
+  const isEmpty = initiatives.length === 0 && epics.length === 0 && items.filter(i => !i.parent_id).length === 0
 
   return (
     <>
@@ -67,6 +94,9 @@ export default function BacklogView() {
           <div className="page-subtitle">Backlog completo</div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => setInitiativeModalOpen(true)}>
+            + Iniciativa
+          </button>
           <button className="btn btn-ghost" onClick={() => setEpicModalOpen(true)}>
             + Épica
           </button>
@@ -77,9 +107,19 @@ export default function BacklogView() {
       </div>
 
       {epicModalOpen && <NewEpicModal onClose={() => setEpicModalOpen(false)} />}
+      {initiativeModalOpen && <NewInitiativeModal onClose={() => setInitiativeModalOpen(false)} />}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {epics.map(epic => (
+        {initiatives.map(initiative => (
+          <InitiativeSection
+            key={initiative.id}
+            initiative={initiative}
+            epics={byInitiative[initiative.id] || []}
+            byEpic={byEpic}
+          />
+        ))}
+
+        {noInitiative.map(epic => (
           <EpicSection key={epic.id} epic={epic} items={byEpic[epic.id] || []} />
         ))}
 
