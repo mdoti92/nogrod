@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateApiKey, extractApiKey } from './_lib/auth.ts'
 import { formatItemId } from './_lib/items.ts'
 import { getNextItem } from './_lib/next.ts'
+import { buildStatusUpdate } from './_lib/status.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -61,6 +62,30 @@ Deno.serve(async (req: Request) => {
       .single()
     if (error) return json({ error: error.message }, 400)
     return json(data, 201)
+  }
+
+  // PATCH /items/:id/status
+  const statusMatch = path.match(/^\/items\/([^/]+)\/status$/)
+  if (req.method === 'PATCH' && statusMatch) {
+    const id = statusMatch[1]
+    const { status } = await req.json()
+
+    const { data: current, error: fetchError } = await supabase
+      .from('items')
+      .select('started_at')
+      .eq('id', id)
+      .single()
+    if (fetchError) return json({ error: fetchError.message }, 404)
+
+    const updatePayload = buildStatusUpdate(current, status)
+    const { data, error } = await supabase
+      .from('items')
+      .update({ ...updatePayload, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) return json({ error: error.message }, 400)
+    return json(data)
   }
 
   // PATCH /items/:id

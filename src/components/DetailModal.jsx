@@ -6,6 +6,15 @@ import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/
 import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
 import DependenciesSection from './DependenciesSection'
 
+function formatElapsed(startedAt, completedAt) {
+  const ms = new Date(completedAt) - new Date(startedAt)
+  const totalMinutes = Math.floor(ms / 60000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours === 0) return `${minutes}m`
+  return `${hours}h ${minutes}m`
+}
+
 function MarkdownField({ label, value, onChange, onCopy }) {
   const [editMode, setEditMode] = useState(true)
   const receivedContent = useRef(false)
@@ -234,8 +243,17 @@ export default function DetailModal() {
             onCopy={() => navigator.clipboard.writeText(form.executionSummary).then(() => showToast('Resumen copiado ✓'))}
           />
 
-          <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-            Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, borderTop: '1px solid var(--border)', paddingTop: 12, color: 'var(--text-muted)', fontSize: 11 }}>
+            <span>Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}</span>
+            {detailItem.started_at && (
+              <span>Iniciado: {new Date(detailItem.started_at).toLocaleString('es-UY')}</span>
+            )}
+            {detailItem.completed_at && (
+              <span>Completado: {new Date(detailItem.completed_at).toLocaleString('es-UY')}</span>
+            )}
+            {detailItem.started_at && detailItem.completed_at && (
+              <span>Duración: {formatElapsed(detailItem.started_at, detailItem.completed_at)}</span>
+            )}
           </div>
         </div>
 
