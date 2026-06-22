@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
 import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
+import DependenciesSection from './DependenciesSection'
 
 export default function DetailModal() {
   const { detailItem, setDetailItem, epics, showToast, refresh } = useApp()
@@ -147,6 +148,8 @@ export default function DetailModal() {
             <label>Scope Out</label>
             <textarea value={form.scopeOut} onChange={e => set('scopeOut', e.target.value)} />
           </div>
+
+          <DependenciesSection itemId={detailItem.id} />
 
           <AcceptanceCriteriaSection itemId={detailItem.id} />
 
