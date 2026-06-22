@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { groupItemsByEpic, STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS } from '../lib/items'
+import NewEpicModal from './NewEpicModal'
 
 function ItemRow({ item }) {
   const { setDetailItem } = useApp()
@@ -51,6 +52,7 @@ function EpicSection({ epic, items }) {
 export default function BacklogView() {
   const { currentProject, items, epics, setNewItemOpen } = useApp()
   const [noEpicOpen, setNoEpicOpen] = useState(false)
+  const [epicModalOpen, setEpicModalOpen] = useState(false)
 
   if (!currentProject) return null
 
@@ -64,10 +66,17 @@ export default function BacklogView() {
           <div className="page-title">{currentProject.name}</div>
           <div className="page-subtitle">Backlog completo</div>
         </div>
-        <button className="btn btn-primary" onClick={() => setNewItemOpen(true)}>
-          + Nuevo Item
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => setEpicModalOpen(true)}>
+            + Épica
+          </button>
+          <button className="btn btn-primary" onClick={() => setNewItemOpen(true)}>
+            + Nuevo Item
+          </button>
+        </div>
       </div>
+
+      {epicModalOpen && <NewEpicModal onClose={() => setEpicModalOpen(false)} />}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {epics.map(epic => (
