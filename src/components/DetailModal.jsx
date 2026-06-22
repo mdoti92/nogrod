@@ -101,7 +101,7 @@ export default function DetailModal() {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {detailItem.item_id && (
-              <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--gold)' }}>
+              <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>
                 {detailItem.item_id}
               </span>
             )}

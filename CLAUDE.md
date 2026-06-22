@@ -27,7 +27,7 @@ Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este fluj
 2. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "in_progress"}`
    → El item pasa a In Progress en el board
 
-3. Crear branch desde `develop` con nomenclatura `feature/nombre-corto` o `fix/nombre-corto`
+3. Crear branch desde `develop` usando el `item_id` del item: `feature/NOG-X-nombre-corto` o `fix/NOG-X-nombre-corto`
 
 4. Leer el `executable_prompt` del item y ejecutarlo — ese es el prompt de trabajo real
 
@@ -45,8 +45,8 @@ Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este fluj
 
 ## Branching
 - Cada US, Task o Bug sale desde `develop`, nunca desde `main`
-- Nomenclatura: `feature/nombre-corto` para US y Tasks
-- Nomenclatura: `fix/nombre-corto` para Bugs
+- Nomenclatura: `feature/NOG-X-nombre-corto` para US y Tasks (usar `item_id` del item)
+- Nomenclatura: `fix/NOG-X-nombre-corto` para Bugs
 - Antes de crear una branch nueva: `git checkout develop && git pull`
 - Al terminar el item: mergear a `develop` directamente (sin esperar PR manual)
 - Nunca commitear directo a `main` ni a `develop`
