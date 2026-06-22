@@ -1,0 +1,2 @@
+[functions.nogrod-api]
+verify_jwt = false
