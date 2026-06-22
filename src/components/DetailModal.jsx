@@ -1,33 +1,62 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
 import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
 import DependenciesSection from './DependenciesSection'
 
-function ExecutionField({ label, value, onChange, onCopy }) {
+function MarkdownField({ label, value, onChange, onCopy }) {
+  const [editMode, setEditMode] = useState(true)
+  const receivedContent = useRef(false)
+
+  useEffect(() => {
+    if (value && !receivedContent.current) {
+      receivedContent.current = true
+      setEditMode(false)
+    } else if (!value) {
+      receivedContent.current = false
+      setEditMode(true)
+    }
+  }, [value])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
           {label}
         </label>
-        {value && (
+        <div style={{ display: 'flex', gap: 6 }}>
+          {value && (
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 11, padding: '3px 10px' }}
+              onClick={onCopy}
+            >
+              Copiar
+            </button>
+          )}
           <button
             className="btn btn-ghost"
             style={{ fontSize: 11, padding: '3px 10px' }}
-            onClick={onCopy}
+            onClick={() => setEditMode(m => !m)}
           >
-            Copiar
+            {editMode ? 'Vista' : 'Editar'}
           </button>
-        )}
+        </div>
       </div>
-      <textarea
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={`${label}...`}
-        style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 100, lineHeight: 1.5, outline: 'none', width: '100%' }}
-      />
+      {editMode ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={`${label}...`}
+          style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 100, lineHeight: 1.5, outline: 'none', width: '100%' }}
+        />
+      ) : (
+        <div className="markdown-preview">
+          {value ? <ReactMarkdown>{value}</ReactMarkdown> : <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>{label}...</span>}
+        </div>
+      )}
     </div>
   )
 }
@@ -184,37 +213,21 @@ export default function DetailModal() {
 
           <AcceptanceCriteriaSection itemId={detailItem.id} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
-                Prompt ejecutable
-              </label>
-              {form.executablePrompt && (
-                <button
-                  className="btn btn-ghost"
-                  style={{ fontSize: 11, padding: '3px 10px' }}
-                  onClick={() => navigator.clipboard.writeText(form.executablePrompt).then(() => showToast('Prompt copiado ✓'))}
-                >
-                  Copiar
-                </button>
-              )}
-            </div>
-            <textarea
-              value={form.executablePrompt}
-              onChange={e => set('executablePrompt', e.target.value)}
-              placeholder="Prompt para Claude Code..."
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
-            />
-          </div>
+          <MarkdownField
+            label="Prompt ejecutable"
+            value={form.executablePrompt}
+            onChange={v => set('executablePrompt', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executablePrompt).then(() => showToast('Prompt copiado ✓'))}
+          />
 
-          <ExecutionField
+          <MarkdownField
             label="Plan de ejecución"
             value={form.executionPlan}
             onChange={v => set('executionPlan', v)}
             onCopy={() => navigator.clipboard.writeText(form.executionPlan).then(() => showToast('Plan copiado ✓'))}
           />
 
-          <ExecutionField
+          <MarkdownField
             label="Resumen de ejecución"
             value={form.executionSummary}
             onChange={v => set('executionSummary', v)}
