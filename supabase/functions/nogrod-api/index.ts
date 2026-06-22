@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateApiKey, extractApiKey } from './_lib/auth.ts'
 import { formatItemId } from './_lib/items.ts'
 import { getNextItem } from './_lib/next.ts'
+import { isValidStatus, VALID_STATUSES } from './_lib/status.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -61,6 +62,31 @@ Deno.serve(async (req: Request) => {
       .single()
     if (error) return json({ error: error.message }, 400)
     return json(data, 201)
+  }
+
+  // PATCH /items/:id/status
+  const statusMatch = path.match(/^\/items\/([^/]+)\/status$/)
+  if (req.method === 'PATCH' && statusMatch) {
+    const id = statusMatch[1]
+    const body = await req.json()
+
+    if (!isValidStatus(body.status)) {
+      return json(
+        { error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` },
+        400,
+      )
+    }
+
+    const { data, error } = await supabase
+      .from('items')
+      .update({ status: body.status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error?.code === 'PGRST116') return json({ error: 'Item not found' }, 404)
+    if (error) return json({ error: error.message }, 500)
+    return json(data)
   }
 
   // PATCH /items/:id
