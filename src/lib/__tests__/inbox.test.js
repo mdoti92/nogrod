@@ -45,9 +45,20 @@ describe('parseInboxParams', () => {
     expect(result.story_points).toBeUndefined()
     expect(result.priority).toBeUndefined()
     expect(result.context).toBeUndefined()
+    expect(result.scope_out).toBeUndefined()
     expect(result.acceptance_criteria).toBeUndefined()
     expect(result.executable_prompt).toBeUndefined()
     expect(result.dependencies).toBeUndefined()
+  })
+
+  it('maps scope_out param when present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&scope_out=No+incluye+reportes')
+    expect(parseInboxParams(params).scope_out).toBe('No incluye reportes')
+  })
+
+  it('omits scope_out when param is absent', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).scope_out).toBeUndefined()
   })
 
   it('maps multiple dep params to dependencies array', () => {

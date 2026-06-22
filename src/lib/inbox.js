@@ -21,6 +21,9 @@ export function parseInboxParams(searchParams) {
   const context = searchParams.get('context')
   if (context) item.context = context
 
+  const scopeOut = searchParams.get('scope_out')
+  if (scopeOut) item.scope_out = scopeOut
+
   const caList = searchParams.getAll('ca').flatMap(v => v.split('|')).filter(Boolean)
   if (caList.length > 0) item.acceptance_criteria = caList
 
