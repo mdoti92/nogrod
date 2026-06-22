@@ -31,13 +31,17 @@ Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este fluj
 
 4. Leer el `executable_prompt` del item y ejecutarlo — ese es el prompt de trabajo real
 
-5. Codear con TDD siguiendo las reglas de este CLAUDE.md
+5. `PATCH .../nogrod-api/items/:id?api_key=...` con body `{"execution_plan": "..."}` — registrar el plan antes de codear
 
-6. Tests en verde → mergear a `develop` sin esperar confirmación del usuario
+6. Codear con TDD siguiendo las reglas de este CLAUDE.md
 
-7. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "in_review"}`
+7. Tests en verde → mergear a `develop` sin esperar confirmación del usuario
 
-8. Volver al paso 1 con el siguiente item
+8. `PATCH .../nogrod-api/items/:id?api_key=...` con body `{"execution_summary": "..."}` — registrar resumen de lo hecho
+
+9. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "in_review"}`
+
+10. Volver al paso 1 con el siguiente item
 
 ## Branching
 - Cada US, Task o Bug sale desde `develop`, nunca desde `main`

@@ -5,6 +5,33 @@ import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/
 import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
 import DependenciesSection from './DependenciesSection'
 
+function ExecutionField({ label, value, onChange, onCopy }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+          {label}
+        </label>
+        {value && (
+          <button
+            className="btn btn-ghost"
+            style={{ fontSize: 11, padding: '3px 10px' }}
+            onClick={onCopy}
+          >
+            Copiar
+          </button>
+        )}
+      </div>
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={`${label}...`}
+        style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 100, lineHeight: 1.5, outline: 'none', width: '100%' }}
+      />
+    </div>
+  )
+}
+
 export default function DetailModal() {
   const { detailItem, setDetailItem, epics, showToast, refresh } = useApp()
   const [form, setForm] = useState({})
@@ -21,6 +48,8 @@ export default function DetailModal() {
       actualBehavior: detailItem.actual_behavior || '',
       expectedBehavior: detailItem.expected_behavior || '',
       executablePrompt: detailItem.executable_prompt || '',
+      executionPlan: detailItem.execution_plan || '',
+      executionSummary: detailItem.execution_summary || '',
     })
   }, [detailItem])
 
@@ -42,6 +71,8 @@ export default function DetailModal() {
       priority: form.priority,
       scope_out: form.scopeOut || null,
       executable_prompt: form.executablePrompt || null,
+      execution_plan: form.executionPlan || null,
+      execution_summary: form.executionSummary || null,
       updated_at: new Date().toISOString(),
     }
     if (detailItem.type === 'bug') {
@@ -175,6 +206,20 @@ export default function DetailModal() {
               style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
             />
           </div>
+
+          <ExecutionField
+            label="Plan de ejecución"
+            value={form.executionPlan}
+            onChange={v => set('executionPlan', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executionPlan).then(() => showToast('Plan copiado ✓'))}
+          />
+
+          <ExecutionField
+            label="Resumen de ejecución"
+            value={form.executionSummary}
+            onChange={v => set('executionSummary', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executionSummary).then(() => showToast('Resumen copiado ✓'))}
+          />
 
           <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
             Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
