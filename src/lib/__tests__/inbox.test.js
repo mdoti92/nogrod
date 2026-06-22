@@ -78,6 +78,16 @@ describe('parseInboxParams', () => {
     ])
   })
 
+  it('splits pipe-separated ca param into multiple criteria', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=texto1|texto2|texto3')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['texto1', 'texto2', 'texto3'])
+  })
+
+  it('handles mix of pipe-separated and multiple ca params', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=a|b&ca=c')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['a', 'b', 'c'])
+  })
+
   it('maps single ca param to acceptance_criteria array of one', () => {
     const params = new URLSearchParams('type=us&title=T&project_id=x&ca=Un+solo+criterio')
     expect(parseInboxParams(params).acceptance_criteria).toEqual(['Un solo criterio'])
