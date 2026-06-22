@@ -27,5 +27,8 @@ export function parseInboxParams(searchParams) {
   const prompt = searchParams.get('prompt')
   if (prompt) item.executable_prompt = prompt
 
+  const depList = searchParams.getAll('dep')
+  if (depList.length > 0) item.dependencies = depList
+
   return item
 }

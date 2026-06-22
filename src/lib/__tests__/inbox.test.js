@@ -47,6 +47,25 @@ describe('parseInboxParams', () => {
     expect(result.context).toBeUndefined()
     expect(result.acceptance_criteria).toBeUndefined()
     expect(result.executable_prompt).toBeUndefined()
+    expect(result.dependencies).toBeUndefined()
+  })
+
+  it('maps multiple dep params to dependencies array', () => {
+    const uuid1 = 'aaaaaaaa-0000-0000-0000-000000000001'
+    const uuid2 = 'aaaaaaaa-0000-0000-0000-000000000002'
+    const params = new URLSearchParams(`type=us&title=T&project_id=x&dep=${uuid1}&dep=${uuid2}`)
+    expect(parseInboxParams(params).dependencies).toEqual([uuid1, uuid2])
+  })
+
+  it('maps single dep param to dependencies array of one', () => {
+    const uuid = 'aaaaaaaa-0000-0000-0000-000000000001'
+    const params = new URLSearchParams(`type=us&title=T&project_id=x&dep=${uuid}`)
+    expect(parseInboxParams(params).dependencies).toEqual([uuid])
+  })
+
+  it('omits dependencies when no dep params present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).dependencies).toBeUndefined()
   })
 
   it('maps multiple ca params to acceptance_criteria array', () => {

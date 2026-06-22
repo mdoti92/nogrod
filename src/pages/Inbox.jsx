@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { parseInboxParams } from '../lib/inbox'
 import { bulkInsertCriteria } from '../lib/acceptanceCriteria'
+import { bulkInsertDependencies } from '../lib/dependencies'
 
 const API_URL = import.meta.env.VITE_NOGROD_API_URL
 const API_KEY = import.meta.env.VITE_NOGROD_API_KEY
@@ -52,7 +53,7 @@ export default function Inbox() {
     setLoading(true)
     setError(null)
     try {
-      const { acceptance_criteria: caList, ...itemPayload } = item
+      const { acceptance_criteria: caList, dependencies: depList, ...itemPayload } = item
       const res = await fetch(`${API_URL}/items?api_key=${API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -60,9 +61,10 @@ export default function Inbox() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear item')
-      if (caList && caList.length > 0) {
-        await bulkInsertCriteria(data.id, caList)
-      }
+      await Promise.all([
+        caList?.length > 0 ? bulkInsertCriteria(data.id, caList) : Promise.resolve(),
+        depList?.length > 0 ? bulkInsertDependencies(data.id, depList) : Promise.resolve(),
+      ])
       navigate('/', { state: { success: true, item_id: data.item_id, title: item.title } })
     } catch (err) {
       setError(err.message)
