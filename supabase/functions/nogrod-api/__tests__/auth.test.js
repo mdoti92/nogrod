@@ -25,6 +25,18 @@ describe('validateApiKey', () => {
   it('returns true when either value has surrounding whitespace', () => {
     expect(validateApiKey(' secret ', ' secret ')).toBe(true)
   })
+
+  it('returns false when keys share every character except the last one', () => {
+    expect(validateApiKey('secret-key-1', 'secret-key-2')).toBe(false)
+  })
+
+  it('returns false when keys have different lengths but a common prefix', () => {
+    expect(validateApiKey('secret', 'secret-extra')).toBe(false)
+  })
+
+  it('returns false for empty strings compared against a real secret', () => {
+    expect(validateApiKey('', 'secret')).toBe(false)
+  })
 })
 
 describe('extractApiKey', () => {
