@@ -438,6 +438,8 @@ header {
 }
 
 .form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
 .form-group textarea,
 .form-group select {
   background: var(--bg);
@@ -453,6 +455,8 @@ header {
 }
 
 .form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: var(--gold-dim);
@@ -556,6 +560,44 @@ header {
   transition: var(--transition);
 }
 .close-btn:hover { color: var(--text); }
+
+/* AUTH */
+.auth-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-card .logo {
+  align-self: center;
+  margin-bottom: 8px;
+}
+
+.auth-error {
+  background: rgba(139,32,32,0.15);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: #f5a0a0;
+  font-size: 12px;
+}
+
+.auth-submit { width: 100%; justify-content: center; }
 
 /* TOAST */
 .toast {
