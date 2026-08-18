@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
+import logoMark from '../assets/nogrod-logo-mark.svg'
 
 export default function Header() {
   const { setNewItemOpen } = useApp()
@@ -8,7 +9,10 @@ export default function Header() {
 
   return (
     <header>
-      <div className="logo">Nogrod <span>TD Forge</span></div>
+      <div className="logo">
+        <img src={logoMark} alt="" className="logo-mark" />
+        Nogrod <span>TD Forge</span>
+      </div>
       <div className="header-actions">
         <Link className="btn btn-ghost" to="/flows">
           Flows
