@@ -22,9 +22,10 @@ export const FLOW_SECTIONS = [
     id: 'mover-item',
     title: 'Mover un item por el board',
     description:
-      'Hacé clic en una tarjeta del board para abrir su detalle, cambiá el campo Estado (Backlog, ' +
-      'To Do, In Progress, In Review o Done) y guardá. El cambio se refleja al instante en la columna ' +
-      'correspondiente.',
+      'Arrastrá una tarjeta y soltala sobre otra columna (Backlog, To Do, In Progress, In Review o ' +
+      'Done) para cambiar su estado al instante — se guarda directo en la base. Si la soltás fuera de ' +
+      'una columna válida o en la misma de origen, no pasa nada. Un clic normal (sin arrastrar) sigue ' +
+      'abriendo el detalle del item, donde también podés cambiar el estado a mano.',
   },
   {
     id: 'login',
