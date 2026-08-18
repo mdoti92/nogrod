@@ -34,6 +34,20 @@ export function groupItemsByStatus(items) {
   return groups
 }
 
+export function groupEpicsByInitiative(epics) {
+  const byInitiative = {}
+  const noInitiative = []
+  epics.forEach(epic => {
+    if (epic.initiative_id) {
+      if (!byInitiative[epic.initiative_id]) byInitiative[epic.initiative_id] = []
+      byInitiative[epic.initiative_id].push(epic)
+    } else {
+      noInitiative.push(epic)
+    }
+  })
+  return { byInitiative, noInitiative }
+}
+
 export function groupItemsByEpic(items) {
   const byEpic = {}
   const noEpic = []

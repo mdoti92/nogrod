@@ -45,7 +45,68 @@ describe('parseInboxParams', () => {
     expect(result.story_points).toBeUndefined()
     expect(result.priority).toBeUndefined()
     expect(result.context).toBeUndefined()
+    expect(result.scope_out).toBeUndefined()
+    expect(result.acceptance_criteria).toBeUndefined()
     expect(result.executable_prompt).toBeUndefined()
+    expect(result.dependencies).toBeUndefined()
+  })
+
+  it('maps scope_out param when present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&scope_out=No+incluye+reportes')
+    expect(parseInboxParams(params).scope_out).toBe('No incluye reportes')
+  })
+
+  it('omits scope_out when param is absent', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).scope_out).toBeUndefined()
+  })
+
+  it('maps multiple dep params to dependencies array', () => {
+    const uuid1 = 'aaaaaaaa-0000-0000-0000-000000000001'
+    const uuid2 = 'aaaaaaaa-0000-0000-0000-000000000002'
+    const params = new URLSearchParams(`type=us&title=T&project_id=x&dep=${uuid1}&dep=${uuid2}`)
+    expect(parseInboxParams(params).dependencies).toEqual([uuid1, uuid2])
+  })
+
+  it('maps single dep param to dependencies array of one', () => {
+    const uuid = 'aaaaaaaa-0000-0000-0000-000000000001'
+    const params = new URLSearchParams(`type=us&title=T&project_id=x&dep=${uuid}`)
+    expect(parseInboxParams(params).dependencies).toEqual([uuid])
+  })
+
+  it('omits dependencies when no dep params present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).dependencies).toBeUndefined()
+  })
+
+  it('maps multiple ca params to acceptance_criteria array', () => {
+    const params = new URLSearchParams(
+      'type=us&title=T&project_id=x&ca=El+sistema+valida+email&ca=Se+muestra+error+si+falla'
+    )
+    expect(parseInboxParams(params).acceptance_criteria).toEqual([
+      'El sistema valida email',
+      'Se muestra error si falla',
+    ])
+  })
+
+  it('splits pipe-separated ca param into multiple criteria', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=texto1|texto2|texto3')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['texto1', 'texto2', 'texto3'])
+  })
+
+  it('handles mix of pipe-separated and multiple ca params', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=a|b&ca=c')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['a', 'b', 'c'])
+  })
+
+  it('maps single ca param to acceptance_criteria array of one', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x&ca=Un+solo+criterio')
+    expect(parseInboxParams(params).acceptance_criteria).toEqual(['Un solo criterio'])
+  })
+
+  it('omits acceptance_criteria when no ca params present', () => {
+    const params = new URLSearchParams('type=us&title=T&project_id=x')
+    expect(parseInboxParams(params).acceptance_criteria).toBeUndefined()
   })
 
   it('maps prompt param to executable_prompt when present', () => {

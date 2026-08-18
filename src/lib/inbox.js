@@ -21,8 +21,17 @@ export function parseInboxParams(searchParams) {
   const context = searchParams.get('context')
   if (context) item.context = context
 
+  const scopeOut = searchParams.get('scope_out')
+  if (scopeOut) item.scope_out = scopeOut
+
+  const caList = searchParams.getAll('ca').flatMap(v => v.split('|')).filter(Boolean)
+  if (caList.length > 0) item.acceptance_criteria = caList
+
   const prompt = searchParams.get('prompt')
   if (prompt) item.executable_prompt = prompt
+
+  const depList = searchParams.getAll('dep')
+  if (depList.length > 0) item.dependencies = depList
 
   return item
 }

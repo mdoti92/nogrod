@@ -15,16 +15,41 @@ Antes de escribir cualquier línea de código, seguís este flujo sin saltear pa
 4. Presentar un plan breve y esperar confirmación si hay ambigüedades
 5. Crear branch para el item
 6. Codear con TDD
-7. Al terminar, abrir PR a main y confirmar con el usuario
+7. Al terminar, con todos los tests en verde, mergear a develop y marcar el item como Done directamente (sin pasar por In Review)
+
+## Flujo autónomo de trabajo
+Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este flujo:
+
+1. `GET https://rkschpopukxdjsdpmqgi.supabase.co/functions/v1/nogrod-api/next?project_id=X&api_key=cf5aaf2e6178b403039942407046646d`
+   - Si retorna `null` → informar al usuario que no hay items en To Do y frenar
+   - Si retorna un item → continuar con ese item
+
+2. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "in_progress"}`
+   → El item pasa a In Progress en el board
+
+3. Crear branch desde `develop` usando el `item_id` del item: `feature/NOG-X-nombre-corto` o `fix/NOG-X-nombre-corto`
+
+4. Leer el `executable_prompt` del item y ejecutarlo — ese es el prompt de trabajo real
+
+5. `PATCH .../nogrod-api/items/:id?api_key=...` con body `{"execution_plan": "..."}` — registrar el plan antes de codear
+
+6. Codear con TDD siguiendo las reglas de este CLAUDE.md
+
+7. Tests en verde → mergear a `develop` sin esperar confirmación del usuario
+
+8. `PATCH .../nogrod-api/items/:id?api_key=...` con body `{"execution_summary": "..."}` — registrar resumen de lo hecho
+
+9. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "done"}` — directo a Done, sin pasar por In Review ni pedir confirmación
+
+10. Volver al paso 1 con el siguiente item
 
 ## Branching
 - Cada US, Task o Bug sale desde `develop`, nunca desde `main`
-- Nomenclatura: `feature/nombre-corto` para US y Tasks
-- Nomenclatura: `fix/nombre-corto` para Bugs
+- Nomenclatura: `feature/NOG-X-nombre-corto` para US y Tasks (usar `item_id` del item)
+- Nomenclatura: `fix/NOG-X-nombre-corto` para Bugs
 - Antes de crear una branch nueva: `git checkout develop && git pull`
-- Al terminar el item se abre un PR a `develop`
+- Al terminar el item: mergear a `develop` directamente (sin esperar PR manual)
 - Nunca commitear directo a `main` ni a `develop`
-- Hacer el merge a `develop` una vez terminado el desarrollo
 
 ## Stack
 - Frontend: React + Vite
@@ -76,4 +101,18 @@ Si aplicar un principio complica algo simple, mencionarlo antes de proceder.
 - Si una dependencia no está resuelta, no avanzar — informar el bloqueo
 - Story Points en Fibonacci: 1, 2, 3, 5, 8, 13, 21
 - Si una US supera 8 SP, alertar — es demasiado grande y hay que partirla
-- Al terminar, confirmar con el usuario antes de marcar el item como Done y mergear el PR
+- Con todos los tests en verde (o sin TDD aplicable, ver excepciones), mergear a develop y marcar el item como Done directamente, sin pasar por In Review ni pedir confirmación — tanto en flujo manual como autónomo
+
+## Nogrod API
+Edge Function desplegada en Supabase. Base URL: `https://rkschpopukxdjsdpmqgi.supabase.co/functions/v1/nogrod-api`
+
+Autenticación: header `X-Api-Key` o query param `api_key=cf5aaf2e6178b403039942407046646d`
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/projects` | Lista todos los proyectos |
+| GET | `/items?project_id=X` | Lista items de un proyecto |
+| POST | `/items` | Crea un item nuevo |
+| PATCH | `/items/:id` | Actualiza campos de un item |
+| PATCH | `/items/:id/status` | Actualiza solo el estado (`backlog\|todo\|in_progress\|in_review\|done`) |
+| GET | `/next?project_id=X` | Devuelve el siguiente item priorizado en To Do sin dependencias bloqueantes |

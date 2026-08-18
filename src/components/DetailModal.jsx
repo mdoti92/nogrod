@@ -1,7 +1,74 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
+import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
+import DependenciesSection from './DependenciesSection'
+
+function formatElapsed(startedAt, completedAt) {
+  const ms = new Date(completedAt) - new Date(startedAt)
+  const totalMinutes = Math.floor(ms / 60000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours === 0) return `${minutes}m`
+  return `${hours}h ${minutes}m`
+}
+
+function MarkdownField({ label, value, onChange, onCopy }) {
+  const [editMode, setEditMode] = useState(true)
+  const receivedContent = useRef(false)
+
+  useEffect(() => {
+    if (value && !receivedContent.current) {
+      receivedContent.current = true
+      setEditMode(false)
+    } else if (!value) {
+      receivedContent.current = false
+      setEditMode(true)
+    }
+  }, [value])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+          {label}
+        </label>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {value && (
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 11, padding: '3px 10px' }}
+              onClick={onCopy}
+            >
+              Copiar
+            </button>
+          )}
+          <button
+            className="btn btn-ghost"
+            style={{ fontSize: 11, padding: '3px 10px' }}
+            onClick={() => setEditMode(m => !m)}
+          >
+            {editMode ? 'Vista' : 'Editar'}
+          </button>
+        </div>
+      </div>
+      {editMode ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={`${label}...`}
+          style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 100, lineHeight: 1.5, outline: 'none', width: '100%' }}
+        />
+      ) : (
+        <div className="markdown-preview">
+          {value ? <ReactMarkdown>{value}</ReactMarkdown> : <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>{label}...</span>}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function DetailModal() {
   const { detailItem, setDetailItem, epics, showToast, refresh } = useApp()
@@ -19,6 +86,8 @@ export default function DetailModal() {
       actualBehavior: detailItem.actual_behavior || '',
       expectedBehavior: detailItem.expected_behavior || '',
       executablePrompt: detailItem.executable_prompt || '',
+      executionPlan: detailItem.execution_plan || '',
+      executionSummary: detailItem.execution_summary || '',
     })
   }, [detailItem])
 
@@ -40,6 +109,8 @@ export default function DetailModal() {
       priority: form.priority,
       scope_out: form.scopeOut || null,
       executable_prompt: form.executablePrompt || null,
+      execution_plan: form.executionPlan || null,
+      execution_summary: form.executionSummary || null,
       updated_at: new Date().toISOString(),
     }
     if (detailItem.type === 'bug') {
@@ -68,7 +139,7 @@ export default function DetailModal() {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {detailItem.item_id && (
-              <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--gold)' }}>
+              <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>
                 {detailItem.item_id}
               </span>
             )}
@@ -147,31 +218,42 @@ export default function DetailModal() {
             <textarea value={form.scopeOut} onChange={e => set('scopeOut', e.target.value)} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
-                Prompt ejecutable
-              </label>
-              {form.executablePrompt && (
-                <button
-                  className="btn btn-ghost"
-                  style={{ fontSize: 11, padding: '3px 10px' }}
-                  onClick={() => navigator.clipboard.writeText(form.executablePrompt).then(() => showToast('Prompt copiado ✓'))}
-                >
-                  Copiar
-                </button>
-              )}
-            </div>
-            <textarea
-              value={form.executablePrompt}
-              onChange={e => set('executablePrompt', e.target.value)}
-              placeholder="Prompt para Claude Code..."
-              style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontFamily: 'monospace', fontSize: 12, padding: '8px 12px', resize: 'vertical', minHeight: 120, lineHeight: 1.5, outline: 'none', width: '100%' }}
-            />
-          </div>
+          <DependenciesSection itemId={detailItem.id} />
 
-          <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-            Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}
+          <AcceptanceCriteriaSection itemId={detailItem.id} />
+
+          <MarkdownField
+            label="Prompt ejecutable"
+            value={form.executablePrompt}
+            onChange={v => set('executablePrompt', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executablePrompt).then(() => showToast('Prompt copiado ✓'))}
+          />
+
+          <MarkdownField
+            label="Plan de ejecución"
+            value={form.executionPlan}
+            onChange={v => set('executionPlan', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executionPlan).then(() => showToast('Plan copiado ✓'))}
+          />
+
+          <MarkdownField
+            label="Resumen de ejecución"
+            value={form.executionSummary}
+            onChange={v => set('executionSummary', v)}
+            onCopy={() => navigator.clipboard.writeText(form.executionSummary).then(() => showToast('Resumen copiado ✓'))}
+          />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, borderTop: '1px solid var(--border)', paddingTop: 12, color: 'var(--text-muted)', fontSize: 11 }}>
+            <span>Creado: {new Date(detailItem.created_at).toLocaleString('es-UY')}</span>
+            {detailItem.started_at && (
+              <span>Iniciado: {new Date(detailItem.started_at).toLocaleString('es-UY')}</span>
+            )}
+            {detailItem.completed_at && (
+              <span>Completado: {new Date(detailItem.completed_at).toLocaleString('es-UY')}</span>
+            )}
+            {detailItem.started_at && detailItem.completed_at && (
+              <span>Duración: {formatElapsed(detailItem.started_at, detailItem.completed_at)}</span>
+            )}
           </div>
         </div>
 

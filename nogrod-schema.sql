@@ -78,7 +78,7 @@ create table dependencies (
   unique(item_id, depends_on_id)
 );
 
--- Habilitar RLS (Row Level Security) - por ahora permisivo para desarrollo
+-- Habilitar RLS (Row Level Security)
 alter table projects enable row level security;
 alter table initiatives enable row level security;
 alter table epics enable row level security;
@@ -86,13 +86,17 @@ alter table items enable row level security;
 alter table acceptance_criteria enable row level security;
 alter table dependencies enable row level security;
 
--- Políticas permisivas para desarrollo (ajustar cuando haya auth)
-create policy "allow all projects" on projects for all using (true);
-create policy "allow all initiatives" on initiatives for all using (true);
-create policy "allow all epics" on epics for all using (true);
-create policy "allow all items" on items for all using (true);
-create policy "allow all ac" on acceptance_criteria for all using (true);
-create policy "allow all deps" on dependencies for all using (true);
+-- Acceso restringido al dueño de la fila (ver supabase/migrations/008_rls_owner.sql).
+-- Cada tabla tiene su propia columna owner_id; en un insert sin owner_id explicito
+-- se completa con auth.uid() (frontend autenticado) o, si no hay sesion (ej. el
+-- edge function nogrod-api via service_role, que bypassea RLS igual), con
+-- default_owner_id(), el unico dueño de hoy.
+create policy "owner access" on projects for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "owner access" on initiatives for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "owner access" on epics for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "owner access" on items for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "owner access" on acceptance_criteria for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "owner access" on dependencies for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
 
 -- Datos iniciales: proyecto Nogrod
 insert into projects (id, name, description, color) values 
