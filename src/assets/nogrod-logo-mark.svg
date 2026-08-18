@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="steel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c7dae2"/>
+      <stop offset="100%" stop-color="#8ea9b6"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- badge base -->
+  <polygon points="120,20 205,68 205,172 120,220 35,172 35,68"
+           fill="#12121a" stroke="#2a2a3a" stroke-width="2"/>
+
+  <!-- inner hex frame -->
+  <polygon points="120,34 193,76 193,164 120,206 47,164 47,76"
+           fill="none" stroke="#5C7A88" stroke-width="2"/>
+
+  <!-- ember accent (top rivet) -->
+  <rect x="112" y="10" width="16" height="16" transform="rotate(45 120 18)" fill="#c0392b"/>
+
+  <!-- N monogram, faceted / angular -->
+  <path d="M78 168 V80 L96 80 L140 148 V80 L162 80 V168 L144 168 L100 100 V168 Z"
+        fill="url(#steel)" filter="url(#glow)"/>
+
+  <!-- anvil-horn accent stroke under the mark -->
+  <line x1="70" y1="180" x2="170" y2="180" stroke="#5C7A88" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -3,9 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { parseInboxParams } from '../lib/inbox'
 import { bulkInsertCriteria } from '../lib/acceptanceCriteria'
 import { bulkInsertDependencies } from '../lib/dependencies'
-
-const API_URL = import.meta.env.VITE_NOGROD_API_URL
-const API_KEY = import.meta.env.VITE_NOGROD_API_KEY
+import { supabase } from '../lib/supabase'
 
 const FIELD_LABELS = {
   type: 'Tipo',
@@ -54,13 +52,8 @@ export default function Inbox() {
     setError(null)
     try {
       const { acceptance_criteria: caList, dependencies: depList, ...itemPayload } = item
-      const res = await fetch(`${API_URL}/items?api_key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(itemPayload),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear item')
+      const { data, error } = await supabase.from('items').insert(itemPayload).select().single()
+      if (error) throw new Error(error.message)
       await Promise.all([
         caList?.length > 0 ? bulkInsertCriteria(data.id, caList) : Promise.resolve(),
         depList?.length > 0 ? bulkInsertDependencies(data.id, depList) : Promise.resolve(),
