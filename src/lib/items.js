@@ -24,6 +24,29 @@ export const PRIORITY_LABELS = {
 
 export const SP_OPTIONS = [1, 2, 3, 5, 8, 13, 21]
 
+export function buildItemPayload(form, projectId) {
+  const payload = {
+    project_id: projectId,
+    epic_id: form.epicId || null,
+    type: form.type,
+    title: form.title.trim(),
+    context: form.context || null,
+    scope_out: form.scopeOut || null,
+    executable_prompt: form.executablePrompt || null,
+    story_points: form.storyPoints ? parseInt(form.storyPoints, 10) : null,
+    priority: form.priority,
+    status: form.status,
+  }
+
+  if (form.type === 'bug') {
+    payload.actual_behavior = form.actualBehavior || null
+    payload.expected_behavior = form.expectedBehavior || null
+    payload.severity = form.severity
+  }
+
+  return payload
+}
+
 export function groupItemsByStatus(items) {
   const groups = Object.fromEntries(STATUSES.map(s => [s, []]))
   items

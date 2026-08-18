@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
-import { SP_OPTIONS } from '../lib/items'
-
-const API_URL = import.meta.env.VITE_NOGROD_API_URL
-const API_KEY = import.meta.env.VITE_NOGROD_API_KEY
+import { SP_OPTIONS, buildItemPayload } from '../lib/items'
 
 const EMPTY_FORM = {
   type: 'us',
@@ -54,33 +51,11 @@ export default function NewItemModal() {
     if (!form.title.trim()) { showToast('El título es requerido'); return }
     setLoading(true)
 
-    const payload = {
-      project_id: projectId,
-      epic_id: form.epicId || null,
-      type: form.type,
-      title: form.title.trim(),
-      context: form.context || null,
-      scope_out: form.scopeOut || null,
-      executable_prompt: form.executablePrompt || null,
-      story_points: form.storyPoints ? parseInt(form.storyPoints) : null,
-      priority: form.priority,
-      status: form.status,
-    }
-
-    if (form.type === 'bug') {
-      payload.actual_behavior = form.actualBehavior || null
-      payload.expected_behavior = form.expectedBehavior || null
-      payload.severity = form.severity
-    }
+    const payload = buildItemPayload(form, projectId)
 
     try {
-      const res = await fetch(`${API_URL}/items?api_key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear item')
+      const { error } = await supabase.from('items').insert(payload)
+      if (error) throw new Error(error.message)
       showToast('Item creado ⚒')
       setNewItemOpen(false)
       refresh()
