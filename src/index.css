@@ -561,6 +561,19 @@ header {
 }
 .close-btn:hover { color: var(--text); }
 
+/* FLOWS */
+.flows-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.flows-diagram svg { max-width: 100%; }
+
 /* AUTH */
 .auth-page {
   flex: 1;

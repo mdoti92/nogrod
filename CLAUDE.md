@@ -102,6 +102,7 @@ Si aplicar un principio complica algo simple, mencionarlo antes de proceder.
 - Story Points en Fibonacci: 1, 2, 3, 5, 8, 13, 21
 - Si una US supera 8 SP, alertar — es demasiado grande y hay que partirla
 - Con todos los tests en verde (o sin TDD aplicable, ver excepciones), mergear a develop y marcar el item como Done directamente, sin pasar por In Review ni pedir confirmación — tanto en flujo manual como autónomo
+- Toda US/Task/Bug que agregue, cambie o elimine un flujo o componente de arquitectura debe actualizar `src/content/flows.js` (la página `/flows`) como parte de la Definition of Done, antes de mergear
 
 ## Nogrod API
 Edge Function desplegada en Supabase. Base URL: `https://rkschpopukxdjsdpmqgi.supabase.co/functions/v1/nogrod-api`
