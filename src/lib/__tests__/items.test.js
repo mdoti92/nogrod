@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, STATUSES } from '../items'
+import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, buildItemPayload, STATUSES } from '../items'
 
 describe('groupItemsByStatus', () => {
   it('returns empty buckets for all statuses when there are no items', () => {
@@ -106,5 +106,67 @@ describe('groupEpicsByInitiative', () => {
     const { byInitiative, noInitiative } = groupEpicsByInitiative(epics)
     expect(byInitiative).toEqual({})
     expect(noInitiative).toHaveLength(2)
+  })
+})
+
+describe('buildItemPayload', () => {
+  const baseForm = {
+    type: 'us',
+    title: '  Historia con espacios  ',
+    epicId: '',
+    context: '',
+    scopeOut: '',
+    executablePrompt: '',
+    storyPoints: '',
+    priority: 'medium',
+    status: 'backlog',
+    actualBehavior: '',
+    expectedBehavior: '',
+    severity: 'medium',
+  }
+
+  it('trims the title and maps camelCase form fields to snake_case columns', () => {
+    const payload = buildItemPayload(baseForm, 'project-1')
+    expect(payload).toMatchObject({
+      project_id: 'project-1',
+      type: 'us',
+      title: 'Historia con espacios',
+      priority: 'medium',
+      status: 'backlog',
+    })
+  })
+
+  it('converts blank optional fields to null instead of empty strings', () => {
+    const payload = buildItemPayload(baseForm, 'project-1')
+    expect(payload.epic_id).toBeNull()
+    expect(payload.context).toBeNull()
+    expect(payload.scope_out).toBeNull()
+    expect(payload.executable_prompt).toBeNull()
+    expect(payload.story_points).toBeNull()
+  })
+
+  it('parses story_points to an integer when provided', () => {
+    const payload = buildItemPayload({ ...baseForm, storyPoints: '5' }, 'project-1')
+    expect(payload.story_points).toBe(5)
+  })
+
+  it('omits bug-only fields when type is not bug', () => {
+    const payload = buildItemPayload(baseForm, 'project-1')
+    expect(payload).not.toHaveProperty('actual_behavior')
+    expect(payload).not.toHaveProperty('expected_behavior')
+    expect(payload).not.toHaveProperty('severity')
+  })
+
+  it('includes bug-only fields when type is bug', () => {
+    const payload = buildItemPayload({
+      ...baseForm,
+      type: 'bug',
+      actualBehavior: 'Se rompe',
+      expectedBehavior: 'No se rompe',
+      severity: 'high',
+    }, 'project-1')
+    expect(payload.actual_behavior).toBe('Se rompe')
+    expect(payload.expected_behavior).toBe('No se rompe')
+    expect(payload.severity).toBe('high')
   })
 })
