@@ -15,7 +15,7 @@ Antes de escribir cualquier línea de código, seguís este flujo sin saltear pa
 4. Presentar un plan breve y esperar confirmación si hay ambigüedades
 5. Crear branch para el item
 6. Codear con TDD
-7. Al terminar, mergear a develop y marcar el item como In Review
+7. Al terminar, con todos los tests en verde, mergear a develop y marcar el item como Done directamente (sin pasar por In Review)
 
 ## Flujo autónomo de trabajo
 Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este flujo:
@@ -39,7 +39,7 @@ Cuando el usuario diga "leé el backlog y arrancá a trabajar", seguir este fluj
 
 8. `PATCH .../nogrod-api/items/:id?api_key=...` con body `{"execution_summary": "..."}` — registrar resumen de lo hecho
 
-9. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "in_review"}`
+9. `PATCH .../nogrod-api/items/:id/status?api_key=...` con body `{"status": "done"}` — directo a Done, sin pasar por In Review ni pedir confirmación
 
 10. Volver al paso 1 con el siguiente item
 
@@ -101,8 +101,7 @@ Si aplicar un principio complica algo simple, mencionarlo antes de proceder.
 - Si una dependencia no está resuelta, no avanzar — informar el bloqueo
 - Story Points en Fibonacci: 1, 2, 3, 5, 8, 13, 21
 - Si una US supera 8 SP, alertar — es demasiado grande y hay que partirla
-- Al terminar un item en flujo manual, confirmar con el usuario antes de marcar como Done
-- En flujo autónomo, mergear a develop y pasar a In Review sin confirmación (ver sección anterior)
+- Con todos los tests en verde (o sin TDD aplicable, ver excepciones), mergear a develop y marcar el item como Done directamente, sin pasar por In Review ni pedir confirmación — tanto en flujo manual como autónomo
 
 ## Nogrod API
 Edge Function desplegada en Supabase. Base URL: `https://rkschpopukxdjsdpmqgi.supabase.co/functions/v1/nogrod-api`
