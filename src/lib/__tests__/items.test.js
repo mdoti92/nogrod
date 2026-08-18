@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, buildItemPayload, STATUSES } from '../items'
+import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, buildItemPayload, resolveDroppedStatus, STATUSES } from '../items'
 
 describe('groupItemsByStatus', () => {
   it('returns empty buckets for all statuses when there are no items', () => {
@@ -168,5 +168,27 @@ describe('buildItemPayload', () => {
     expect(payload.actual_behavior).toBe('Se rompe')
     expect(payload.expected_behavior).toBe('No se rompe')
     expect(payload.severity).toBe('high')
+  })
+})
+
+describe('resolveDroppedStatus', () => {
+  it('returns the target column status when dropped on a different valid column', () => {
+    const item = { id: '1', status: 'todo' }
+    expect(resolveDroppedStatus(item, { id: 'in_progress' })).toBe('in_progress')
+  })
+
+  it('returns null when dropped on the same column it started in', () => {
+    const item = { id: '1', status: 'todo' }
+    expect(resolveDroppedStatus(item, { id: 'todo' })).toBeNull()
+  })
+
+  it('returns null when dropped outside any valid column', () => {
+    const item = { id: '1', status: 'todo' }
+    expect(resolveDroppedStatus(item, null)).toBeNull()
+  })
+
+  it('returns null when the drop target id is not a known status', () => {
+    const item = { id: '1', status: 'todo' }
+    expect(resolveDroppedStatus(item, { id: 'some-other-item-id' })).toBeNull()
   })
 })

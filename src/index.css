@@ -228,7 +228,13 @@ header {
   align-items: start;
 }
 
-.board-col { display: flex; flex-direction: column; gap: 8px; }
+.board-col { display: flex; flex-direction: column; gap: 8px; border-radius: var(--radius); transition: var(--transition); }
+
+.board-col-over {
+  outline: 2px dashed var(--gold-dim);
+  outline-offset: 4px;
+  background: var(--gold-glow);
+}
 
 .board-col-header {
   display: flex;
@@ -279,6 +285,11 @@ header {
 
 .board-item:hover { border-color: var(--gold-dim); }
 .board-item:hover::before { opacity: 1; }
+
+.board-item-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
 
 .board-item-id {
   font-family: monospace;

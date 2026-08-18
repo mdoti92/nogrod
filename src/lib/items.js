@@ -47,6 +47,14 @@ export function buildItemPayload(form, projectId) {
   return payload
 }
 
+export function resolveDroppedStatus(item, over) {
+  if (!over) return null
+  const targetStatus = over.id
+  if (!STATUSES.includes(targetStatus)) return null
+  if (targetStatus === item.status) return null
+  return targetStatus
+}
+
 export function groupItemsByStatus(items) {
   const groups = Object.fromEntries(STATUSES.map(s => [s, []]))
   items
