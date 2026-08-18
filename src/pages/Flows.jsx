@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { FLOWS_DIAGRAM, FLOW_SECTIONS } from '../content/flows'
 import FlowsDiagram from '../components/FlowsDiagram'
+import logoMark from '../assets/nogrod-logo-mark.svg'
 
 export default function Flows() {
   const { signOut } = useAuth()
@@ -10,7 +11,10 @@ export default function Flows() {
   return (
     <>
       <header>
-        <div className="logo">Nogrod <span>Flows</span></div>
+        <div className="logo">
+          <img src={logoMark} alt="" className="logo-mark" />
+          Nogrod <span>Flows</span>
+        </div>
         <div className="header-actions">
           <Link className="btn btn-ghost" to="/">← Volver</Link>
           <button className="btn btn-ghost" onClick={signOut}>Salir</button>
