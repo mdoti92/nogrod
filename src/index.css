@@ -369,6 +369,18 @@ header {
 .status-in_progress { background: #1a1200; color: #ffc107; border: 1px solid #3a2800; }
 .status-in_review { background: #1a0d2d; color: #c084fc; border: 1px solid #3a1a5a; }
 .status-done { background: #0d1a0d; color: #4ade80; border: 1px solid #1a3a1a; }
+.status-paused { background: #1a1614; color: #a8a29e; border: 1px dashed #57534e; }
+
+.paused-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px dashed #57534e;
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 12px;
+}
 
 /* LIST */
 .item-list { display: flex; flex-direction: column; gap: 6px; }

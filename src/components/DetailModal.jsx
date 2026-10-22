@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
-import { STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
+import { STATUSES, STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS, SP_OPTIONS } from '../lib/items'
+import { isPaused } from '../lib/pause'
 import AcceptanceCriteriaSection from './AcceptanceCriteriaSection'
 import DependenciesSection from './DependenciesSection'
+import PauseControl from './PauseControl'
 
 function formatElapsed(startedAt, completedAt) {
   const ms = new Date(completedAt) - new Date(startedAt)
@@ -124,6 +126,12 @@ export default function DetailModal() {
     refresh()
   }
 
+  function handlePauseChanged() {
+    showToast(isPaused(detailItem) ? 'Item reanudado ✓' : 'Item pausado ✓')
+    setDetailItem(null)
+    refresh()
+  }
+
   async function handleDelete() {
     if (!confirm('¿Eliminar este item?')) return
     const { error } = await supabase.from('items').delete().eq('id', detailItem.id)
@@ -165,15 +173,24 @@ export default function DetailModal() {
             <textarea value={form.context} onChange={e => set('context', e.target.value)} />
           </div>
 
+          <PauseControl
+            table="items"
+            entity={detailItem}
+            onChanged={handlePauseChanged}
+            onError={() => showToast('Error cambiando la pausa')}
+          />
+
           <div className="form-row">
-            <div className="form-group">
-              <label>Estado</label>
-              <select value={form.status} onChange={e => set('status', e.target.value)}>
-                {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
-            </div>
+            {!isPaused(detailItem) && (
+              <div className="form-group">
+                <label>Estado</label>
+                <select value={form.status} onChange={e => set('status', e.target.value)}>
+                  {STATUSES.map(status => (
+                    <option key={status} value={status}>{STATUS_LABELS[status]}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="form-group">
               <label>Story Points</label>
               <select value={form.storyPoints} onChange={e => set('storyPoints', e.target.value)}>
