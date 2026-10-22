@@ -1,3 +1,6 @@
+import { PAUSED_STATUS } from './pause'
+
+// Board workflow statuses. Paused is deliberately not here: it is not a board column.
 export const STATUSES = ['backlog', 'todo', 'in_progress', 'in_review', 'done']
 
 export const STATUS_LABELS = {
@@ -6,6 +9,7 @@ export const STATUS_LABELS = {
   in_progress: 'In Progress',
   in_review: 'In Review',
   done: 'Done',
+  [PAUSED_STATUS]: 'Pausado',
 }
 
 export const TYPE_LABELS = {

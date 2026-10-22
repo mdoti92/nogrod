@@ -28,6 +28,18 @@ export const FLOW_SECTIONS = [
       'abriendo el detalle del item, donde también podés cambiar el estado a mano.',
   },
   {
+    id: 'pausar-item',
+    title: 'Pausar y reanudar items o épicas',
+    description:
+      'Desde el detalle de un item (o de una épica, con el botón "Detalle" en el backlog) podés ' +
+      '"Pausar" lo que esté en Backlog, To Do, In Progress o In Review; lo que está en Done no se ' +
+      'puede pausar. Al pausar se guarda el estado en el que estaba, y "Reanudar" lo devuelve ' +
+      'exactamente ahí. Los pausados no aparecen en el board; en el backlog están ocultos salvo que ' +
+      'actives "Mostrar pausados", y ahí se ven con el badge "Pausado". Pausar una épica no toca sus ' +
+      'items: si todavía tiene items activos, la épica se sigue mostrando con su badge. La base ' +
+      'rechaza cualquier pausa inconsistente, aunque se haga por SQL directo.',
+  },
+  {
     id: 'login',
     title: 'Login',
     description:

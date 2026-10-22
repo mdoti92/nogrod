@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { groupItemsByEpic, groupEpicsByInitiative, STATUS_LABELS, TYPE_LABELS, PRIORITY_LABELS } from '../lib/items'
+import { filterVisibleItems, filterVisibleEpics } from '../lib/pause'
 import NewEpicModal from './NewEpicModal'
 import NewInitiativeModal from './NewInitiativeModal'
 
@@ -29,7 +30,14 @@ function ItemRow({ item }) {
 }
 
 function EpicSection({ epic, items }) {
+  const { setDetailEpic } = useApp()
   const [open, setOpen] = useState(false)
+
+  function openDetail(e) {
+    e.stopPropagation()
+    setDetailEpic(epic)
+  }
+
   return (
     <div className="epic-section">
       <div className="epic-header" onClick={() => setOpen(o => !o)}>
@@ -37,6 +45,9 @@ function EpicSection({ epic, items }) {
         <span className="epic-title-text">{epic.title}</span>
         <span className="badge badge-sp" style={{ marginLeft: 'auto' }}>{items.length} items</span>
         <span className={`status-pill status-${epic.status}`}>{STATUS_LABELS[epic.status]}</span>
+        <button className="btn btn-ghost" style={{ fontSize: 11, padding: '3px 10px' }} onClick={openDetail}>
+          Detalle
+        </button>
       </div>
       {open && (
         <div className="epic-body">
@@ -79,11 +90,13 @@ export default function BacklogView() {
   const [noEpicOpen, setNoEpicOpen] = useState(false)
   const [epicModalOpen, setEpicModalOpen] = useState(false)
   const [initiativeModalOpen, setInitiativeModalOpen] = useState(false)
+  const [showPaused, setShowPaused] = useState(false)
 
   if (!currentProject) return null
 
-  const { byEpic, noEpic } = groupItemsByEpic(items)
-  const { byInitiative, noInitiative } = groupEpicsByInitiative(epics)
+  const { byEpic, noEpic } = groupItemsByEpic(filterVisibleItems(items, { showPaused }))
+  const visibleEpics = filterVisibleEpics(epics, byEpic, { showPaused })
+  const { byInitiative, noInitiative } = groupEpicsByInitiative(visibleEpics)
   const isEmpty = initiatives.length === 0 && epics.length === 0 && items.filter(i => !i.parent_id).length === 0
 
   return (
@@ -93,7 +106,11 @@ export default function BacklogView() {
           <div className="page-title">{currentProject.name}</div>
           <div className="page-subtitle">Backlog completo</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-dim)', cursor: 'pointer' }}>
+            <input type="checkbox" checked={showPaused} onChange={e => setShowPaused(e.target.checked)} />
+            Mostrar pausados
+          </label>
           <button className="btn btn-ghost" onClick={() => setInitiativeModalOpen(true)}>
             + Iniciativa
           </button>

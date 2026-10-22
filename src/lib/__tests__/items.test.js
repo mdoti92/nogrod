@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, buildItemPayload, resolveDroppedStatus, STATUSES } from '../items'
+import { groupItemsByStatus, groupItemsByEpic, groupEpicsByInitiative, buildItemPayload, resolveDroppedStatus, STATUSES, STATUS_LABELS } from '../items'
 
 describe('groupItemsByStatus', () => {
   it('returns empty buckets for all statuses when there are no items', () => {
@@ -31,6 +31,16 @@ describe('groupItemsByStatus', () => {
     const result = groupItemsByStatus(items)
     expect(result.todo).toHaveLength(1)
     expect(result.todo[0].id).toBe('2')
+  })
+
+  it('leaves paused items out of every board column', () => {
+    const items = [
+      { id: '1', status: 'paused', paused_from_status: 'in_progress', parent_id: null },
+      { id: '2', status: 'in_progress', parent_id: null },
+    ]
+    const result = groupItemsByStatus(items)
+    expect(Object.keys(result)).not.toContain('paused')
+    expect(result.in_progress.map(i => i.id)).toEqual(['2'])
   })
 
   it('ignores items with unknown status', () => {
@@ -190,5 +200,20 @@ describe('resolveDroppedStatus', () => {
   it('returns null when the drop target id is not a known status', () => {
     const item = { id: '1', status: 'todo' }
     expect(resolveDroppedStatus(item, { id: 'some-other-item-id' })).toBeNull()
+  })
+
+  it('returns null when dropped on a paused target, since paused is not a board column', () => {
+    const item = { id: '1', status: 'todo' }
+    expect(resolveDroppedStatus(item, { id: 'paused' })).toBeNull()
+  })
+})
+
+describe('STATUS_LABELS', () => {
+  it('labels the paused status as "Pausado"', () => {
+    expect(STATUS_LABELS.paused).toBe('Pausado')
+  })
+
+  it('keeps paused out of the board statuses', () => {
+    expect(STATUSES).toEqual(['backlog', 'todo', 'in_progress', 'in_review', 'done'])
   })
 })
