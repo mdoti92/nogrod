@@ -8,10 +8,11 @@ import BacklogView from '../components/BacklogView'
 import OverviewView from '../components/OverviewView'
 import NewItemModal from '../components/NewItemModal'
 import DetailModal from '../components/DetailModal'
+import EpicDetailModal from '../components/EpicDetailModal'
 import Toast from '../components/Toast'
 
 function NogrodApp() {
-  const { view, newItemOpen, detailItem, showToast } = useApp()
+  const { view, newItemOpen, detailItem, detailEpic, showToast } = useApp()
   const location = useLocation()
 
   useEffect(() => {
@@ -35,6 +36,7 @@ function NogrodApp() {
       </div>
       {newItemOpen && <NewItemModal />}
       {detailItem && <DetailModal />}
+      {detailEpic && <EpicDetailModal />}
       <Toast />
     </>
   )

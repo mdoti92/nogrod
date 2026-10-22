@@ -44,4 +44,22 @@ describe('BoardView', () => {
 
     expect(setDetailItem).toHaveBeenCalledWith(item)
   })
+
+  it('does not show paused items in any column', () => {
+    const pausedItem = { ...item, id: 'item-2', title: 'Item pausado', status: 'paused', paused_from_status: 'todo' }
+    useApp.mockReturnValue({
+      currentProject: { id: 'p1', name: 'Nogrod' },
+      items: [item, pausedItem],
+      setNewItemOpen: vi.fn(),
+      setDetailItem: vi.fn(),
+      showToast: vi.fn(),
+      refresh: vi.fn(),
+    })
+
+    render(<BoardView />)
+
+    expect(screen.getByText('Un item cualquiera')).toBeInTheDocument()
+    expect(screen.queryByText('Item pausado')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pausado')).not.toBeInTheDocument()
+  })
 })

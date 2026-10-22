@@ -13,6 +13,7 @@ export function AppProvider({ children }) {
   const [toast, setToast] = useState(null)
   const [newItemOpen, setNewItemOpen] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
+  const [detailEpic, setDetailEpic] = useState(null)
 
   async function loadForProject(project) {
     const [itemsRes, epicsRes, initiativesRes] = await Promise.all([
@@ -58,8 +59,8 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       projects, currentProject, items, epics, initiatives, view, toast,
-      newItemOpen, detailItem,
-      setView, setNewItemOpen, setDetailItem,
+      newItemOpen, detailItem, detailEpic,
+      setView, setNewItemOpen, setDetailItem, setDetailEpic,
       selectProject, showToast, refresh,
     }}>
       {children}
